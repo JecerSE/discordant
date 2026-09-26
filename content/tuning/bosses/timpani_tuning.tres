@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="TimpaniTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/tuning/timpani_tuning.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+cycle_beats = 8
+cycle_beats_phase3 = 4
+windup_beat = 0
+mallet_beat = 6
+leap_air_beats = 1.0
+leap_max_speed = 620.0
+wave_speed = 380.0
+wave_speed_per_phase = 40.0
+wave_life = 2.2
+wave_height = 36.0
+landing_ring_radius = 130.0
+mallets_phase1 = 2
+mallets_phase2 = 3
+mallet_speed_scale = 0.75
+mallet_lift = 620.0
+mallet_gravity = 1100.0
+mallet_damage_scale = 0.7
+summon_every_beats = 16
+summon_count = 2
+summon_max_alive = 3
