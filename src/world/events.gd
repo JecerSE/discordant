@@ -185,8 +185,7 @@ static func _statue(room: Room, it: Interactable) -> void:
 	Game.save()
 	Game.preview_run(id)
 	room.respawn_player()
-	var c2 := Content.character(id)
-	room.announce(c2.name, c2.innate, Pal.GOLD)
+	room.show_character_card(id)
 
 
 static func _scribble(room: Room, it: Interactable) -> void:

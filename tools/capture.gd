@@ -37,6 +37,9 @@ func _run() -> void:
 	game.goto("hub")
 	await _wait(70)
 	await _shot(game, "02_margin", dir)
+	main.current.show_character_card("whole")
+	await _wait(25)
+	await _shot(game, "02b_character_card", dir)
 
 	game.new_run("quarter")
 	game.grant("cymbal")

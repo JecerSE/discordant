@@ -147,6 +147,11 @@ func beat_feedback(p: Vector2) -> void:
 		hud.beat_hit()
 
 
+func show_character_card(char_id: String) -> void:
+	if hud:
+		hud.show_character_card(char_id)
+
+
 func announce(title: String, subtitle: String, col: Color) -> void:
 	if hud:
 		hud.announce(title, subtitle, col)
