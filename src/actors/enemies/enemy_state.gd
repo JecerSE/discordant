@@ -4,6 +4,7 @@ extends CharacterBody2D
 ## small queries. Split from the original enemy.gd without logic changes.
 
 const GRAV := 2000.0
+const TUNING: EnemyTuning = preload("res://content/tuning/enemy_tuning.tres")
 
 var room: Node
 var id := ""
@@ -47,6 +48,8 @@ var buff_t := 0.0           # rallied by a bandleader or breathed for by a reed
 var invis := false          # breathless rest: only area attacks reach it
 var barrier := false        # reverb warden: throws shots back, staggers strikers
 var dash_dir := Vector2.ZERO
+# Super armor for elites and bosses (issue #3).
+var stun_immune_t := 0.0
 
 
 func setup(enemy_id: String, hp_scale := 1.0, dmg_scale := 1.0) -> void:
@@ -78,6 +81,17 @@ func target_pos() -> Vector2:
 func has_target() -> bool:
 	var p = room.player
 	return (room.decoy and is_instance_valid(room.decoy)) or (p and p.is_targetable())
+
+
+## States in which an elite or boss has committed to an attack.
+const COMMITTED_STATES := ["windup", "charge", "swoop", "air", "dash", "dive", "gust_windup", "pull_windup", "pull"]
+
+
+## Elites and bosses can't be stunned, knocked back or interrupted while they wind up
+## or carry out an attack. Hits still deal damage.
+func has_super_armor() -> bool:
+	return (elite or boss) and (telegraph > 0.0 or state in COMMITTED_STATES)
+
 
 
 func grounded() -> bool:

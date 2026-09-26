@@ -31,7 +31,7 @@ func take_damage(amount: float, info := {}) -> bool:
 	hit_flash = 0.1
 	hp_bar_t = 3.0
 	hits_taken += 1
-	if info.has("knock") and not boss:
+	if info.has("knock") and not boss and not has_super_armor():
 		var k: Vector2 = info.knock * (1.0 + Game.flag("knockback")) * (1.0 - weight)
 		if k.length() > 20.0:
 			velocity = k
@@ -55,9 +55,13 @@ func take_damage(amount: float, info := {}) -> bool:
 
 func apply_stun(time: float) -> void:
 	invis = false
+	if has_super_armor() or stun_immune_t > 0.0:
+		return
 	if boss:
-		time *= 0.2
+		time *= TUNING.boss_stun_scale
 	stun = maxf(stun, time)
+	if elite or boss:
+		stun_immune_t = stun + TUNING.stun_immunity
 	if not boss and state in ["windup", "charge", "swoop", "tether"]:
 		if state == "tether":
 			_end_tether()

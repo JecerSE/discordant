@@ -40,6 +40,7 @@ func _physics_process(delta: float) -> void:
 	if tether_t > 0.0:
 		tether_t -= delta
 	knock_t -= d
+	stun_immune_t -= delta
 
 	if stun > 0.0:
 		stun -= d #stun formula

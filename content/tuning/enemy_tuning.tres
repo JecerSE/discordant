@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="EnemyTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/tuning/enemy_tuning.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+aggro_range = 560.0
+leash_range = 900.0
+patrol_radius = 260.0
+patrol_min_step = 80.0
+patrol_arrive_distance = 14.0
+patrol_pause_min = 0.4
+patrol_pause_max = 1.4
+turn_cooldown = 0.35
+patrol_speed_scale = 0.5
+boss_stun_scale = 0.2
+stun_immunity = 2.0

@@ -67,8 +67,9 @@ func die() -> void:
 	super.die()
 
 
+## Bosses use the shared stun rules (super armor, reduced duration, immunity window).
 func apply_stun(time: float) -> void:
-	stun = maxf(stun, time * 0.2)
+	super.apply_stun(time)
 
 
 func summon(id: String, count: int, max_alive: int) -> void:
