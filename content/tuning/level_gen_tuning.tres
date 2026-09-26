@@ -1,0 +1,41 @@
+[gd_resource type="Resource" script_class="LevelGenTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/tuning/level_gen_tuning.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+combat_width_min = 2300.0
+combat_width_extra = 900.0
+wind_width_bonus = 200.0
+elite_width = 1900.0
+segment_length_min = 200.0
+segment_length_max = 560.0
+gap_min = 120.0
+gap_max = 280.0
+gap_per_line = 20.0
+start_margin = 220.0
+end_margin = 160.0
+climb_reach = 110.0
+same_line_reach = 150.0
+stepping_stone_length = 180.0
+feature_min_spacing = 280.0
+feature_spawn_clearance = 420.0
+feature_exit_clearance = 380.0
+feature_tries = 24
+waves_min = 2
+waves_max = 4
+wave_size_min = 3
+wave_size_extra = 2
+wave_size_per_bar = 1
+wave_size_cap = 8
+max_same_type_per_wave = 2
+reinforcement_chance = 0.35
+reinforcement_size_min = 1
+reinforcement_size_max = 3
+spawn_spacing = 170.0
+spawn_player_distance = 320.0
+branch_layers = PackedInt32Array(2, 3, 3, 3, 3, 2)
+special_rooms = PackedStringArray("elite", "shop", "chest", "chest", "teach", "teach")
+second_elite_chance = 0.6
+rest_or_chest_chance = 0.35
+bonus_drop_chance = 0.4

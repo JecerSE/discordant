@@ -50,8 +50,7 @@ static func _staff(room: Room, rng: RandomNumberGenerator, dens: Array) -> void:
 
 
 static func _features(room: Room, rng: RandomNumberGenerator, fam: String, n: int) -> void:
-	for i in n:
-		var x := rng.randf_range(420, room.width - 380)
+	for x in FeaturePlacer.pick(rng, room.width, n):
 		match fam:
 			"percussion":
 				room.features.append({"kind": "drum", "pos": Vector2(x, room.floor_y), "squash": 0.0})
