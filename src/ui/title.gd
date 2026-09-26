@@ -24,7 +24,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_t += delta
 	queue_redraw()
-	if overlay and is_instance_valid(overlay):
+	if _has_overlay():
 		return
 	if _grace > 0.0:
 		_grace -= delta
@@ -63,7 +63,7 @@ func _end_prologue() -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
-	if prologue or (overlay and is_instance_valid(overlay)):
+	if prologue or _has_overlay():
 		return
 	if event is InputEventMouseMotion:
 		for k in _rects.size():
@@ -85,8 +85,8 @@ func _pick(k: int) -> void:
 			_pro_i = 0
 			_pro_t = 0.0
 		"Settings":
-			var p = preload("res://src/ui/pause_menu.gd").new()
-			p.page = "settings"
+			var p := SettingsMenu.new()
+			p.return_to_pause = false
 			overlay = p
 			add_child(p)
 		"Quit":
@@ -150,3 +150,10 @@ func _draw_prologue(sz: Vector2) -> void:
 	for k in Content.PROLOGUE.size():
 		draw_circle(Vector2(sz.x * 0.5 - (Content.PROLOGUE.size() - 1) * 9.0 + k * 18.0, sz.y - 90), 4.0, Pal.INK if k <= _pro_i else Pal.INK_FAINT)
 	UI.text(self, Vector2(sz.x * 0.5, sz.y - 50), "Space to continue  ·  Esc to skip", 14, Pal.INK_SOFT, HORIZONTAL_ALIGNMENT_CENTER)
+
+
+func _has_overlay() -> bool:
+	for c in get_children():
+		if c is Overlay:
+			return true
+	return false

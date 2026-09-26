@@ -58,3 +58,14 @@ func down() -> bool:
 func close() -> void:
 	Synth.sfx_play("tick", -10.0, 2.0)
 	queue_free()
+
+
+## Swaps this overlay for another one (e.g. Pause -> Settings), inside a room or on a
+## plain screen like the title or the map.
+func replace_with(next: Overlay) -> void:
+	next.room = room
+	if room != null and room.has_method("open_overlay"):
+		room.open_overlay(next)
+	else:
+		get_parent().add_child(next)
+		queue_free()

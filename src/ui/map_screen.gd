@@ -40,7 +40,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_t += delta
 	queue_redraw()
-	if overlay and is_instance_valid(overlay):
+	if _has_overlay():
 		return
 	if _grace > 0.0:
 		_grace -= delta
@@ -66,8 +66,15 @@ func _open(o: Node) -> void:
 	add_child(o)
 
 
+func _has_overlay() -> bool:
+	for c in get_children():
+		if c is Overlay:
+			return true
+	return false
+
+
 func _gui_input(event: InputEvent) -> void:
-	if overlay and is_instance_valid(overlay):
+	if _has_overlay():
 		return
 	if event is InputEventMouseMotion:
 		for k in choices.size():
