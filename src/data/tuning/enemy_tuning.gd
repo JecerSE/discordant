@@ -7,6 +7,9 @@ extends Resource
 @export var aggro_range: float = 560.0
 ## ...and gives up once the player is farther than this.
 @export var leash_range: float = 900.0
+## Once the last wave is down to this many Rests, they always know where the player is,
+## so a tall room never ends in a hunt for a straggler two staves away.
+@export var hunt_when_remaining: int = 2
 
 @export_group("Patrol")
 ## How far from its spawn point an idle enemy wanders (px).

@@ -23,6 +23,9 @@ func _ready() -> void:
 	Layout.build(self)
 	_build_geometry()
 
+	var backdrop := EnvironmentBackdrop.new()
+	backdrop.setup(self)
+	add_child(backdrop)
 	_bg = preload("res://src/world/background.gd").new()
 	_bg.setup(self, rng)
 	add_child(_bg)
@@ -35,14 +38,14 @@ func _ready() -> void:
 
 	player = Player.new()
 	player.room = self
-	player.position = Vector2(90, floor_y - 40)
+	player.position = spawn_pos
 	_layer_actors.add_child(player)
 
 	cam = Camera2D.new()
 	cam.limit_left = 0
 	cam.limit_right = int(width)
 	cam.limit_top = 0
-	cam.limit_bottom = 720
+	cam.limit_bottom = int(height)
 	cam.position_smoothing_enabled = true
 	cam.position_smoothing_speed = 7.0
 	player.add_child(cam)
@@ -119,6 +122,7 @@ func _physics_process(delta: float) -> void:
 		Synth.hush = move_toward(Synth.hush, base_hush(), delta * MUSIC_TUNING.hush_follow_speed)
 
 	_update_features(delta)
+	_update_ink(delta)
 	for l in _line_fx:
 		l.t -= delta
 	_line_fx = _line_fx.filter(func(l): return l.t > 0.0)
@@ -146,8 +150,8 @@ func _physics_process(delta: float) -> void:
 	if player and not player.dead:
 		# Out of bounds safety.
 		if player.global_position.y > floor_y + 200.0:
-			player.global_position = Vector2(90, floor_y - 60)
-		if exit_open and has_exit and not _leaving and player.global_position.x > width - 80.0 and player.global_position.y > line_ys[4]:
+			player.global_position = spawn_pos
+		if exit_open and has_exit and not _leaving and exit_rect.has_point(player.global_position):
 			_leave()
 		_interaction()
 

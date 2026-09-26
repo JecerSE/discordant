@@ -102,7 +102,7 @@ func has_super_armor() -> bool:
 ## Notice the player inside aggro range, lose them past leash range. Elites and
 ## bosses always know where the player is.
 func update_aggro() -> void:
-	if elite or boss:
+	if elite or boss or _last_stragglers():
 		aggro = true
 		return
 	var p = room.player
@@ -114,6 +114,11 @@ func update_aggro() -> void:
 		aggro = true
 	elif dist > TUNING.leash_range:
 		aggro = false
+
+
+func _last_stragglers() -> bool:
+	return room.type in ["combat", "elite"] and room.wave_i + 1 >= room.waves.size() and room.pending_spawns <= 0 \
+		and room.alive_enemies().size() <= TUNING.hunt_when_remaining
 
 
 func grounded() -> bool:

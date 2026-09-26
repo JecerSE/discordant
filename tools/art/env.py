@@ -69,9 +69,14 @@ def sky_layer(area, rng):
     c = Canvas(LW, LH)
     dither_gradient(c, hexc(a["sky"][0]), hexc(a["sky"][1]))
     if area == "ledger":
-        for y in range(18, LH, 14):
-            c.line(0, y, LW - 1, y, hexc("b9cde0"))
-        c.line(40, 0, 40, LH - 1, hexc("e08aa0"))
+        # Paper fibres and faint pencil flecks. No ruled lines: the room draws its own
+        # staff, and screen-fixed lines would slide against it.
+        for i in range(90):
+            x, y = rng.randrange(LW), rng.randrange(LH)
+            c.set(x, y, hexc("ddd3bb" if i % 3 else "cfc4a8"))
+        for i in range(6):
+            x, y = rng.randrange(LW - 12), rng.randrange(LH // 2)
+            c.line(x, y, x + rng.randrange(4, 12), y + rng.randrange(-1, 2), hexc("d4cab0"))
     elif area == "percussion":
         for i in range(14):
             x, y = rng.randrange(LW), rng.randrange(LH // 2)

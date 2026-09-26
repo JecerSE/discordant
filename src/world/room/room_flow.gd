@@ -138,3 +138,16 @@ func _leave() -> void:
 	if type == "boss" and not n.is_empty():
 		Game.advance_page()
 	Game.goto("map")
+
+
+## Platforms inking in, and the exit door growing in once it shows. Arena exits stay
+## hidden until the room is cleared, then pop up on a platform.
+func _update_ink(delta: float) -> void:
+	ink_t += delta
+	PlatformInk.advance(segments, ink_t)
+	var shown := has_exit and (exit_open or not exit_hidden)
+	var was := exit_pop
+	exit_pop = move_toward(exit_pop, 1.0 if shown else 0.0, delta / Layout.TUNING.exit_pop_duration)
+	if was == 0.0 and exit_pop > 0.0 and exit_hidden:
+		Synth.sfx_play("spawn", -8.0, 4.0)
+		shake(4.0)

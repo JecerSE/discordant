@@ -11,8 +11,22 @@ var node_idx := -1
 var page_id := "ledger"
 var family := "ledger"
 var width := 1920.0
+var height := 720.0
 var floor_y := 660.0
+## Every level's y, bottom first: staff lines, plus two ledger levels between staves.
 var line_ys: Array = [550.0, 440.0, 330.0, 220.0, 110.0]
+## Stacked staves (RoomShape.configure_levels) and the room's shape (RoomShape).
+var systems := 1
+var shape := "corridor"
+var spawn_pos := Vector2(90, 620)
+## The exit door's foot, the area that leaves the room, and whether the door stays
+## hidden until the room is cleared (arenas). exit_pop grows the door in (0 to 1).
+var exit_pos := Vector2.ZERO
+var exit_rect := Rect2()
+var exit_hidden := false
+var exit_pop := 0.0
+## Seconds since the room opened, for the platforms inking in (PlatformInk).
+var ink_t := 0.0
 var segments: Array = []
 var features: Array = []
 
@@ -68,13 +82,15 @@ func _build_geometry() -> void:
 	solid.collision_mask = 0
 	add_child(solid)
 	_add_rect(solid, Rect2(-100, floor_y, width + 200, 300))
-	_add_rect(solid, Rect2(-100, -400, 100, 1400))
-	_add_rect(solid, Rect2(width, -400, 100, 1400))
+	_add_rect(solid, Rect2(-100, -400, 100, height + 700))
+	_add_rect(solid, Rect2(width, -400, 100, height + 700))
 	_add_rect(solid, Rect2(-100, -400, width + 200, 400 + 30))
+	PlatformInk.schedule(segments, spawn_pos)
 	for s in segments:
 		var body := StaticBody2D.new()
-		body.collision_layer = 2
+		body.collision_layer = PlatformInk.start_layer(s)
 		body.collision_mask = 0
+		s.body = body
 		add_child(body)
 		var cs := CollisionShape2D.new()
 		var rs := RectangleShape2D.new()

@@ -72,6 +72,7 @@ func _run() -> void:
 
 
 func _play_room(room) -> void:
+	_idle_t = 0
 	var t := 0
 	var n0: int = frames
 	var room_type: String = room.type
@@ -92,10 +93,17 @@ func _play_room(room) -> void:
 				for it in room.interactables:
 					if not it.used and it.kind in ["chest", "bench", "scribble"] and absf(it.global_position.x - p.global_position.x) < 50:
 						Input.action_press("interact")
-				Input.action_press("move_right")
-				if p.is_on_wall() and t % 20 == 0:
+				# Head for the door. Climbs and arenas put it up on a platform; the bot tests
+				# the flow, not the platforming, so after a while it steps through.
+				var to_exit: Vector2 = room.exit_pos - p.global_position
+				Input.action_press("move_right" if to_exit.x >= 0.0 else "move_left")
+				if (p.is_on_wall() or to_exit.y < -60.0) and t % 20 == 0:
 					Input.action_press("jump")
+				_idle_t += 1
+				if _idle_t > 60 * 6 and room.exit_open:
+					p.global_position = room.exit_pos + Vector2(0, -30)
 			elif es.size() > 0:
+				es.sort_custom(func(a, b): return a.global_position.distance_to(p.global_position) < b.global_position.distance_to(p.global_position))
 				var e = es[0]
 				var dx: float = e.global_position.x - p.global_position.x
 				if absf(dx) > 50:
@@ -109,8 +117,10 @@ func _play_room(room) -> void:
 				if t % 70 == 0:
 					Input.action_press("power2")
 				# Cheat a long fight along so the flow keeps moving.
+				# Tall rooms spread a wave over several staves, so the cheat hits them all.
 				if t > 60 * 40 and t % 30 == 0:
-					e.take_damage(e.max_hp * 0.1, {"kind": "cheat"})
+					for o in es:
+						o.take_damage(o.max_hp * 0.1, {"kind": "cheat"})
 		await _frames(1)
 	if t >= 60 * 150:
 		print("[play] room %s timed out" % room_type)
@@ -120,6 +130,10 @@ func _play_room(room) -> void:
 				print("[play]   left: %s ai=%s at %s state=%s aggro=%s" % [e.id, e.ai, e.global_position.round(), e.state, e.aggro])
 	else:
 		print("[play] %s done in %.1fs" % [room_type, (frames - n0) / 60.0])
+
+
+## Frames spent heading for the exit in the current room.
+var _idle_t := 0
 
 
 func _frames(n: int) -> void:
