@@ -151,6 +151,8 @@ func _physics_process(delta: float) -> void:
 
 	if Input.is_action_just_pressed("pause") and overlay == null:
 		open_overlay(preload("res://src/ui/pause_menu.gd").new())
+	elif DebugTools.enabled() and Input.is_action_just_pressed(DebugTools.ACTION) and overlay == null:
+		open_overlay(DebugMenu.new())
 	elif Input.is_action_just_pressed("loadout") and overlay == null and Game.has_run():
 		open_overlay(preload("res://src/ui/loadout.gd").new())
 

@@ -163,6 +163,8 @@ func try_reflect(proj: Node) -> bool:
 
 
 func take_hit(amount: float, from: Vector2, opts := {}) -> bool:
+	if Game.god_mode:
+		return false
 	var unblockable: bool = opts.get("unblockable", false)
 	if dead or (not unblockable and not is_hittable()):
 		return false

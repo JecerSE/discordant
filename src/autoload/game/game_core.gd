@@ -26,6 +26,9 @@ var _stats_dirty := true
 var save_path := SAVE_PATH
 
 
+## Debug menu: take no damage (issue #21). Not saved.
+var god_mode := false
+
 func _setup_input() -> void:
 	var map := {
 		"move_left": [KEY_A, KEY_LEFT, "pad:" + str(JOY_BUTTON_DPAD_LEFT), "axis:0:-1"],
@@ -67,6 +70,7 @@ func _setup_input() -> void:
 				ev = mb
 			if ev:
 				InputMap.action_add_event(action, ev)
+	DebugTools.install()
 
 
 func load_save() -> void:

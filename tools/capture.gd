@@ -85,4 +85,7 @@ func _run() -> void:
 	room2.open_overlay(load("res://src/ui/loadout.gd").new())
 	await _wait(10)
 	await _shot(game, "13_loadout", dir)
+	room2.open_overlay(load("res://src/debug/debug_menu.gd").new())
+	await _wait(10)
+	await _shot(game, "16_debug", dir)
 	quit()
