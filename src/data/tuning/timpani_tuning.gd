@@ -6,6 +6,7 @@ extends Resource
 @export_group("Rhythm")
 ## Beats in one attack cycle for phases 1-2 and for phase 3.
 @export var cycle_beats: int = 8
+## Beats in one attack cycle in phase 3 (faster).
 @export var cycle_beats_phase3: int = 4
 ## Beat in the cycle that shows the wind-up; the leap comes one beat later.
 @export var windup_beat: int = 0
@@ -13,24 +14,39 @@ extends Resource
 @export var mallet_beat: int = 6
 ## Airtime of a leap, in beats. It lands on a beat, then stands still until the next wind-up.
 @export var leap_air_beats: float = 1.0
+## Fastest horizontal speed of a leap (px/s).
 @export var leap_max_speed: float = 620.0
 
 @export_group("Shockwaves")
+## Landing shockwave speed in phase 1 (px/s).
 @export var wave_speed: float = 380.0
+## Extra shockwave speed per phase (px/s).
 @export var wave_speed_per_phase: float = 40.0
+## How long a shockwave travels (s).
 @export var wave_life: float = 2.2
+## Shockwave height; jump over it (px).
 @export var wave_height: float = 36.0
+## Radius of the ring around a landing (px).
 @export var landing_ring_radius: float = 130.0
 
 @export_group("Mallets")
+## Mallets thrown per volley in phase 1.
 @export var mallets_phase1: int = 2
+## Mallets thrown per volley in phase 2.
 @export var mallets_phase2: int = 3
+## Mallet throw speed as a fraction of the original.
 @export var mallet_speed_scale: float = 0.75
+## Upward speed of a thrown mallet (px/s).
 @export var mallet_lift: float = 620.0
+## Gravity on thrown mallets (px/s²).
 @export var mallet_gravity: float = 1100.0
+## Mallet damage as a fraction of the boss damage.
 @export var mallet_damage_scale: float = 0.7
 
 @export_group("Summons")
+## From phase 2, summon Snare Rests this often (beats).
 @export var summon_every_beats: int = 16
+## Snare Rests per summon.
 @export var summon_count: int = 2
+## No summon while this many other enemies are alive.
 @export var summon_max_alive: int = 3

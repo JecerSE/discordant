@@ -15,7 +15,9 @@ extends Resource
 @export var patrol_min_step: float = 80.0
 ## Distance at which a patrol point counts as reached (px).
 @export var patrol_arrive_distance: float = 14.0
+## Shortest pause at a patrol point (s).
 @export var patrol_pause_min: float = 0.4
+## Longest pause at a patrol point (s).
 @export var patrol_pause_max: float = 1.4
 ## Minimum time between turning around at a wall or ledge (s).
 @export var turn_cooldown: float = 0.35

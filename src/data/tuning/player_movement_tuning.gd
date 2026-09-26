@@ -23,9 +23,13 @@ extends Resource
 @export var beat_dash_bonus: float = 0.35
 ## Landing on the beat gives a short burst of speed ("flow").
 @export var flow_time: float = 0.5
+## Speed bonus during flow (fraction).
 @export var flow_speed_bonus: float = 0.15
 
 @export_group("Launchers")
+## Upward speed a drum pad launches you at (px/s).
 @export var drum_launch_speed: float = 1180.0
+## Upward acceleration inside an updraft (px/s²).
 @export var updraft_accel: float = 3400.0
+## Fastest rise inside an updraft (px/s).
 @export var updraft_max_rise: float = 560.0
