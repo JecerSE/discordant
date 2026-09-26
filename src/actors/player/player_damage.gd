@@ -50,11 +50,12 @@ func deal(e: Node, base: float, info := {}) -> bool:
 	if room.frozen:
 		# Fermata: written down now, paid when time resumes.
 		e.stored_damage += amount * 1.5
-		room.float_text(e.global_position + Vector2(0, -e.r - 10), "%d" % int(amount), Pal.MARGIN, 16)
+		room.show_damage(e, e.r, amount, DamageNumbers.Style.STORED)
 		return false
 
 	var killed: bool = e.take_damage(amount, info)
-	room.float_text(e.global_position + Vector2(randf_range(-10, 10), -e.r - 12), "%d" % int(round(amount)), Pal.GOLD if on_beat else Pal.INK, 22 if on_beat else 18)
+	var number_style := DamageNumbers.Style.ON_BEAT if on_beat else (DamageNumbers.Style.NORMAL if proc else DamageNumbers.Style.FOLLOW_UP)
+	room.show_damage(e, e.r, amount, number_style)
 	if not on_beat:
 		Synth.sfx_play("hit", -9.0, 2.0)
 	var sp := FX.Splat.new()
@@ -83,7 +84,7 @@ func deal(e: Node, base: float, info := {}) -> bool:
 		for o in room.alive_enemies():
 			if o != e and o.tether_t > 0.0:
 				o.take_damage(amount * 0.6, {"kind": "shared"})
-				room.float_text(o.global_position + Vector2(0, -o.r - 10), "%d" % int(amount * 0.6), Pal.STRING, 16)
+				room.show_damage(o, o.r, amount * 0.6, DamageNumbers.Style.SHARED)
 
 	# Echo: everything repeats one beat later.
 	var wr: WeakRef = weakref(e)
@@ -131,7 +132,7 @@ func _echo_hit(wr: WeakRef, amount: float) -> void:
 	var e = wr.get_ref()
 	if e and not e.dead:
 		e.take_damage(amount, {"kind": "echo"})
-		room.float_text(e.global_position + Vector2(0, -e.r - 10), "%d" % int(amount), Pal.STRING, 16)
+		room.show_damage(e, e.r, amount, DamageNumbers.Style.ECHO)
 		Synth.sfx_play("ping", -18.0, 5.0)
 
 

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="FeedbackTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/tuning/feedback_tuning.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+damage_merge_window_ms = 220
+damage_font_size = 18
+on_beat_font_size = 22
+channel_font_size = 16
+merge_pop_size = 6

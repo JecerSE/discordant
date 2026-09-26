@@ -82,7 +82,7 @@ func release_stored() -> void:
 	if stored_damage > 0.0 and not dead:
 		var amt := stored_damage
 		stored_damage = 0.0
-		room.float_text(global_position + Vector2(0, -r - 16), "%d" % int(amt), Pal.MARGIN, 26)
+		room.show_damage(self, r, amt, DamageNumbers.Style.STORED)
 		take_damage(amt, {"kind": "fermata"})
 
 

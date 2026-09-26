@@ -51,6 +51,9 @@ var _layer_proj: Node2D
 var _bg: Node2D
 
 
+var damage_numbers := DamageNumbers.new()
+
+
 func setup(args: Dictionary) -> void:
 	type = args.get("type", "combat")
 	node_idx = args.get("node", -1)
@@ -122,6 +125,11 @@ func float_text(p: Vector2, text: String, col: Color, size := 18) -> void:
 	f.size = size
 	f.position = p
 	add_fx(f)
+
+
+## Damage numbers go through here so hits on one target merge instead of stacking.
+func show_damage(target: Node2D, radius: float, amount: float, style: DamageNumbers.Style) -> void:
+	damage_numbers.show(self, target, radius, amount, style)
 
 
 func shake(amount: float) -> void:
