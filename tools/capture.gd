@@ -64,6 +64,11 @@ func _run() -> void:
 		if room.player:
 			room.player.hp = room.player.max_hp
 			room.player.global_position.x = minf(room.width * 0.4, 600.0)
+			# In the shop, stand at the first item so its description shows.
+			for it in room.interactables:
+				if it.kind == "shop":
+					room.player.global_position.x = it.global_position.x
+					break
 		await _wait(20)
 		await _shot(game, spec[2], dir)
 

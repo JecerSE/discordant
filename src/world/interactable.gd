@@ -38,6 +38,19 @@ func label() -> String:
 	return prompt
 
 
+## Extra information for the prompt: what a shop item does (issue #20).
+func detail() -> Dictionary:
+	if kind != "shop" or used:
+		return {}
+	var id: String = data.id
+	return {
+		"name": UI.item_name(id),
+		"kind": UI.kind_label(id),
+		"desc": UI.item_desc(id),
+		"color": Pal.family_color(Content.item_family(id)) if id != "heal" else Pal.HEAL,
+	}
+
+
 func _draw() -> void:
 	var near: bool = room.player != null and room.player.global_position.distance_to(global_position) < radius
 	match kind:
