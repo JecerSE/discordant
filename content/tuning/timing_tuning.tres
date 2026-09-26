@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="TimingTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/tuning/timing_tuning.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+perfect_window = 0.03
+good_window_scale = 1.8
+perfect_multiplier = 1.65
+great_multiplier = 1.45
+good_multiplier = 1.15
+miss_multiplier = 0.85
+mash_penalty_step = 0.05
+mash_penalty_max_stacks = 6
+combo_interval_tolerance = 0.2
+combo_memory_beats = 9.0
+combo_perfect_multiplier = 1.5

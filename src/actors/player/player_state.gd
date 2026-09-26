@@ -85,6 +85,11 @@ var stagger_t := 0.0
 # Momentum carry and launches (issue #15).
 var momentum_t := 0.0
 var launch_lock := 0.0
+# Timing grades (issue #12).
+var last_grade: BeatGrader.Grade = BeatGrader.Grade.NONE
+var pending_grade: BeatGrader.Grade = BeatGrader.Grade.NONE
+var pending_down := false
+var mash_stacks := 0
 
 
 func refresh_stats() -> void:

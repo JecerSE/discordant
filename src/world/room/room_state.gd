@@ -140,9 +140,12 @@ func hurt_flash() -> void:
 		hud.flash(Pal.BLOOD)
 
 
-func beat_feedback(p: Vector2) -> void:
-	float_text(p, "♪", Pal.GOLD, 26)
-	if hud:
+## Timing popup over the player (issue #12): "perfect!", "great", "good"; nothing on a miss.
+func grade_feedback(p: Vector2, grade: BeatGrader.Grade) -> void:
+	var text := BeatGrader.label(grade)
+	if text != "":
+		float_text(p, text, BeatGrader.color(grade), 22 if grade == BeatGrader.Grade.PERFECT else 17)
+	if BeatGrader.is_on_beat(grade) and hud:
 		hud.beat_hit()
 
 

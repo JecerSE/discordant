@@ -38,6 +38,7 @@ func _physics_process(delta: float) -> void:
 			jump_buf = BUFFER
 		if Input.is_action_just_pressed("attack"):
 			atk_buf = BUFFER
+			_register_attack_press(Input.is_action_pressed("down"))
 		if Input.is_action_just_pressed("dash"):
 			_start_dash(false)
 		for i in 3:

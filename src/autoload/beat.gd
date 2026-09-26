@@ -85,11 +85,18 @@ func distance_to_offbeat() -> float:
 
 
 ## Signed seconds from the nearest beat: negative is early, positive is late.
-func signed_offset() -> float:
-	var bl := beat_len()
-	var t := _t - _latency()
-	var p := fposmod(t, bl)
-	return (p if p < bl * 0.5 else p - bl) / tempo_scale
+## `division` 2 measures against half-beats (eighth notes); `shift` moves the grid by a
+## fraction of a beat (0.5 = the off-beats, used by Syncopation).
+func signed_offset(division := 1, shift := 0.0) -> float:
+	var grid := beat_len() / float(division)
+	var t := _t - _latency() + shift * beat_len()
+	var p := fposmod(t, grid)
+	return (p if p < grid * 0.5 else p - grid) / tempo_scale
+
+
+## Song position in beats, as the player hears it.
+func song_beats() -> float:
+	return (_t - _latency()) / beat_len()
 
 
 func is_on_beat(window: float) -> bool:

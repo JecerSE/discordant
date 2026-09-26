@@ -1,29 +1,48 @@
 class_name PlayerAttacks
 extends PlayerDamage
-## Layer 3 of 6. Beat judgement, the four characters' attacks, melee hit shapes, dash.
+## Layer 3 of 6. Timing grades, the four characters' attacks, melee hit shapes, dash.
 
-func _judge_beat() -> bool:
-	var s := stats()
+## Grades a press right now (issue #12). A primed parry and Tempo Marking's first
+## attack count as perfect.
+func _grade_now() -> BeatGrader.Grade:
 	if primed:
 		primed = false
-		return true
+		return BeatGrader.Grade.PERFECT
 	if Game.flag("first_attack_beat") > 0.0 and not first_attack_used:
-		return true
-	if Game.flag("syncopation") > 0.0:
-		return Beat.distance_to_offbeat() <= s.beat_window
-	return Beat.is_on_beat(s.beat_window)
+		return BeatGrader.Grade.PERFECT
+	var shift := 0.5 if Game.flag("syncopation") > 0.0 else 0.0
+	var offset := Beat.signed_offset(1, shift) if Beat.running else 1.0
+	return BeatGrader.grade(offset, stats().beat_window)
+
+
+## Used by powers: grades now, remembers the grade in last_grade, returns on-beat.
+func _judge_beat() -> bool:
+	last_grade = _grade_now()
+	return BeatGrader.is_on_beat(last_grade)
+
+
+## Called the moment attack is pressed: grades it and updates the mashing penalty.
+## _attack() uses the grade even if it runs a few frames later from the input buffer.
+func _register_attack_press(down_held: bool) -> void:
+	pending_grade = _grade_now()
+	pending_down = down_held
+	if pending_grade == BeatGrader.Grade.MISS:
+		mash_stacks = mini(mash_stacks + 1, BeatGrader.TUNING.mash_penalty_max_stacks)
+	elif pending_grade >= BeatGrader.Grade.GOOD:
+		mash_stacks = 0
 
 
 func _attack() -> void:
 	var s := stats()
-	var on_beat := _judge_beat()
+	var g: BeatGrader.Grade = pending_grade
+	var on_beat := BeatGrader.is_on_beat(g)
 	first_attack_used = true
 	var haste: float = 1.0 + s.atk_speed + (0.5 if accel_t > 0.0 else 0.0)
 	if fade_t > 0.0:
 		fade_bonus = true
 	var col := Pal.GOLD if on_beat else Pal.INK
+	room.grade_feedback(global_position + Vector2(0, -size * 3.5), g)
 	if on_beat:
-		room.beat_feedback(global_position + Vector2(0, -size * 3.5))
 		Synth.sfx_play("hit_beat", -10.0)
 	match char_id:
 		"whole":

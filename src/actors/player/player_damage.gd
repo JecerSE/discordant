@@ -18,8 +18,10 @@ func deal(e: Node, base: float, info := {}) -> bool:
 		mult *= 1.0 + s.proj_dmg
 	if Game.flag("horn_scaling") > 0.0:
 		mult *= 1.0 + maxf(0.0, speed() - 250.0) / 5.0 * 0.01
+	# Timing grade (issue #12). Hits without a grade (follow-ups, echoes) are neutral.
+	var grade: BeatGrader.Grade = info.get("grade", BeatGrader.Grade.GREAT if on_beat else BeatGrader.Grade.NONE)
+	mult *= BeatGrader.damage_multiplier(grade, s.beat_bonus, mash_stacks)
 	if on_beat:
-		mult *= 1.5 + s.beat_bonus
 		if Game.flag("crescendo") > 0.0 and proc:
 			crescendo = mini(crescendo + 1, 10)
 			mult *= 1.0 + Game.flag("crescendo") * crescendo
