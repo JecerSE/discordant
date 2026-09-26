@@ -25,9 +25,7 @@ func ai_process(d: float) -> void:
 				facing = signf(dx) if absf(dx) > 4.0 else facing
 				velocity.x = facing * chase if absf(dx) > 30.0 else 0.0
 			else:
-				if is_on_wall() or (is_on_floor() and not _ground_ahead()):
-					facing = -facing
-				velocity.x = facing * chase * 0.5
+				_patrol_walk(d, chase)
 		"jumper":
 			if is_on_floor():
 				velocity.x = move_toward(velocity.x, 0.0, 1400.0 * d)
@@ -188,3 +186,21 @@ func on_land() -> void:
 				room.shake(8.0)
 		"dropper":
 			pass
+
+
+## Idle wandering for ground enemies (issue #2): walk to the patrol point, pause,
+## pick another. Turning at walls and ledges has a cooldown so it can't jitter.
+func _patrol_walk(d: float, chase: float) -> void:
+	var px := patrol.update(global_position.x, d, room.width)
+	if patrol.is_pausing():
+		velocity.x = move_toward(velocity.x, 0.0, 900.0 * d)
+		return
+	var blocked := is_on_wall() or (is_on_floor() and not _ground_ahead())
+	if blocked and turn_cd <= 0.0:
+		patrol.blocked(global_position.x, room.width)
+		turn_cd = TUNING.turn_cooldown
+		px = patrol.target_x
+	var pdx := px - global_position.x
+	if absf(pdx) > 1.0:
+		facing = signf(pdx)
+	velocity.x = facing * chase * TUNING.patrol_speed_scale

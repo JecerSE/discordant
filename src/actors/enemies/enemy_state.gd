@@ -48,6 +48,10 @@ var buff_t := 0.0           # rallied by a bandleader or breathed for by a reed
 var invis := false          # breathless rest: only area attacks reach it
 var barrier := false        # reverb warden: throws shots back, staggers strikers
 var dash_dir := Vector2.ZERO
+# Detection and idle wandering (issue #2).
+var aggro := false
+var patrol: EnemyPatrol
+var turn_cd := 0.0
 # Super armor for elites and bosses (issue #3).
 var stun_immune_t := 0.0
 
@@ -73,14 +77,14 @@ func target_pos() -> Vector2:
 	if room.decoy and is_instance_valid(room.decoy):
 		return room.decoy.global_position
 	var p = room.player
-	if p and p.is_targetable():
+	if p and p.is_targetable() and aggro:
 		return p.global_position
-	return Vector2(home.x + sin(t * 0.6 + beat_offset) * 220.0, home.y)
+	return Vector2(patrol.target_x if patrol else home.x, home.y)
 
 
 func has_target() -> bool:
 	var p = room.player
-	return (room.decoy and is_instance_valid(room.decoy)) or (p and p.is_targetable())
+	return (room.decoy and is_instance_valid(room.decoy)) or (p and p.is_targetable() and aggro)
 
 
 ## States in which an elite or boss has committed to an attack.
@@ -92,6 +96,22 @@ const COMMITTED_STATES := ["windup", "charge", "swoop", "air", "dash", "dive", "
 func has_super_armor() -> bool:
 	return (elite or boss) and (telegraph > 0.0 or state in COMMITTED_STATES)
 
+
+## Notice the player inside aggro range, lose them past leash range. Elites and
+## bosses always know where the player is.
+func update_aggro() -> void:
+	if elite or boss:
+		aggro = true
+		return
+	var p = room.player
+	if p == null:
+		aggro = false
+		return
+	var dist: float = global_position.distance_to(p.global_position)
+	if dist <= TUNING.aggro_range:
+		aggro = true
+	elif dist > TUNING.leash_range:
+		aggro = false
 
 
 func grounded() -> bool:

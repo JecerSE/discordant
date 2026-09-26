@@ -28,6 +28,7 @@ func take_damage(amount: float, info := {}) -> bool:
 			room.float_text(global_position + Vector2(0, -r - 30), "blocked", Pal.INK_SOFT, 15)
 			Synth.sfx_play("tick", -8.0, 8.0)
 	hp -= amount
+	aggro = true
 	hit_flash = 0.1
 	hp_bar_t = 3.0
 	hits_taken += 1

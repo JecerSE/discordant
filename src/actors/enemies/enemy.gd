@@ -20,6 +20,7 @@ func _ready() -> void:
 	shape.shape = c
 	add_child(shape)
 	home = global_position
+	patrol = EnemyPatrol.new(get_instance_id(), home.x)
 	facing = -1.0 if room.player and room.player.global_position.x < global_position.x else 1.0
 	Beat.beat.connect(_on_beat)
 
@@ -40,7 +41,9 @@ func _physics_process(delta: float) -> void:
 	if tether_t > 0.0:
 		tether_t -= delta
 	knock_t -= d
+	turn_cd -= d
 	stun_immune_t -= delta
+	update_aggro()
 
 	if stun > 0.0:
 		stun -= d #stun formula

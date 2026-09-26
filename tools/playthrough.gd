@@ -114,6 +114,10 @@ func _play_room(room) -> void:
 		await _frames(1)
 	if t >= 60 * 150:
 		print("[play] room %s timed out" % room_type)
+		if is_instance_valid(room):
+			print("[play]   state=%s pending=%d wave=%d/%d player=%s" % [room.state, room.pending_spawns, room.wave_i + 1, room.waves.size(), room.player.global_position if room.player else "none"])
+			for e in room.alive_enemies():
+				print("[play]   left: %s ai=%s at %s state=%s aggro=%s" % [e.id, e.ai, e.global_position.round(), e.state, e.aggro])
 	else:
 		print("[play] %s done in %.1fs" % [room_type, (frames - n0) / 60.0])
 
