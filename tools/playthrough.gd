@@ -74,6 +74,7 @@ func _run() -> void:
 func _play_room(room) -> void:
 	var t := 0
 	var n0: int = frames
+	var room_type: String = room.type
 	while is_instance_valid(room) and main.current == room and t < 60 * 150:
 		t += 1
 		var p = room.player
@@ -112,9 +113,9 @@ func _play_room(room) -> void:
 					e.take_damage(e.max_hp * 0.1, {"kind": "cheat"})
 		await _frames(1)
 	if t >= 60 * 150:
-		print("[play] room %s timed out in state %s" % [room.type, room.state])
+		print("[play] room %s timed out" % room_type)
 	else:
-		print("[play] %s %s done in %.1fs" % [game.page_id() if game.has_run() else "-", room.type, (frames - n0) / 60.0])
+		print("[play] %s done in %.1fs" % [room_type, (frames - n0) / 60.0])
 
 
 func _frames(n: int) -> void:

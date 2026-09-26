@@ -4,6 +4,8 @@ This document has three parts. Part 1 audits the v1.0 prototype. Part 2 sets the
 
 # Part 1: Audit of the prototype
 
+> **File paths changed after this audit.** The code was split into files under 300 lines on 2026-09-25 without behavior changes. `docs/FILE_MAP.md` maps every path and line count below to its new location.
+
 This audit covers the v1.0 prototype (release v1.0, 2026-09-24): Godot 4.7.2, GDScript, GL Compatibility renderer. It documents what the code does today, so it can be rebuilt properly. The prototype is a disposable reference implementation and is not refactored in place.
 
 **Summary for the rebuild**
