@@ -15,22 +15,29 @@ static func _pick(pool: Array, n: int, rng: RandomNumberGenerator) -> Array:
 static func relics(n: int, rng: RandomNumberGenerator) -> Array:
 	var pool: Array = []
 	for id in Content.RELICS:
-		if not Content.RELICS[id].get("champion", false) and not Game.owns(id):
+		if not Content.RELICS[id].get("champion", false) and not Game.owns(id) and ItemRequirements.is_relevant(id):
 			pool.append(id)
 	return _pick(pool, n, rng)
 
 
-## Swap and family runes, with a lean toward the current page's pillar.
+## Swap and family runes that fit your kit (issue #26), leaning toward the current
+## bar's pillar and the pillars you already play.
 static func runes(n: int, rng: RandomNumberGenerator, lean := "") -> Array:
 	var pool: Array = []
+	var yours := ItemRequirements.owned_families()
 	for id in Content.RUNES:
 		var d: Dictionary = Content.RUNES[id]
 		if (d.kind == "swap" or d.kind == "family" or d.kind == "pause") and not Game.owns(id):
+			if not ItemRequirements.is_relevant(id):
+				continue
 			# Rare instruments only turn up a third of the time.
 			if d.get("rare", false) and rng.randf() > 0.33:
 				continue
 			pool.append(id)
-			if lean != "" and d.get("family", "") == lean:
+			var fam: String = d.get("family", "")
+			if lean != "" and fam == lean:
+				pool.append(id)
+			if fam != "" and fam in yours:
 				pool.append(id)
 	var out: Array = []
 	var p := pool.duplicate()

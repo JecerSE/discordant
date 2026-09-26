@@ -81,4 +81,7 @@ static func item_desc(id: String) -> String:
 	var s: String = d.get("desc", "")
 	if Content.POWERS.has(id):
 		s += "\nCooldown %.1fs." % float(d.cd)
+	var reason := ItemRequirements.missing_reason(id) if Game.has_run() else ""
+	if reason != "":
+		s += "\n(Does nothing yet: %s.)" % reason
 	return s
