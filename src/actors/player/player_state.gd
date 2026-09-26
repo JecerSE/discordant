@@ -85,11 +85,14 @@ var stagger_t := 0.0
 # Momentum carry and launches (issue #15).
 var momentum_t := 0.0
 var launch_lock := 0.0
-# Timing grades (issue #12).
+# Timing grades (issues #12, #14).
 var last_grade: BeatGrader.Grade = BeatGrader.Grade.NONE
 var pending_grade: BeatGrader.Grade = BeatGrader.Grade.NONE
 var pending_down := false
 var mash_stacks := 0
+var jump_grade: BeatGrader.Grade = BeatGrader.Grade.NONE
+var flow_t := 0.0
+var dash_on_beat := false
 
 
 func refresh_stats() -> void:
@@ -110,6 +113,8 @@ func speed() -> float:
 	var sp: float = s.base_speed * (1.0 + s.speed)
 	if accel_t > 0.0:
 		sp *= 1.3
+	if flow_t > 0.0:
+		sp *= 1.0 + MOVE_TUNING.flow_speed_bonus
 	return sp
 
 

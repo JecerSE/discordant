@@ -36,6 +36,7 @@ func _physics_process(delta: float) -> void:
 		dir = Input.get_axis("move_left", "move_right")
 		if Input.is_action_just_pressed("jump"):
 			jump_buf = BUFFER
+			jump_grade = _movement_grade()
 		if Input.is_action_just_pressed("attack"):
 			atk_buf = BUFFER
 			_register_attack_press(Input.is_action_pressed("down"))
@@ -147,6 +148,7 @@ func _timers(delta: float) -> void:
 	stagger_t -= delta
 	momentum_t -= delta
 	launch_lock -= delta
+	flow_t -= delta
 	if marks > 0:
 		marks_t -= delta
 		if marks_t <= 0.0:
@@ -193,7 +195,19 @@ func _timers(delta: float) -> void:
 		charge = minf(1.0, charge + delta)
 
 
+## Grade for movement presses: always against the beat, no forced grades.
+func _movement_grade() -> BeatGrader.Grade:
+	if not Beat.running:
+		return BeatGrader.Grade.NONE
+	return BeatGrader.grade(Beat.signed_offset(), stats().beat_window)
+
+
 func _jump(v: float) -> void:
+	# A jump pressed on the beat goes higher (issue #14).
+	if BeatGrader.is_on_beat(jump_grade):
+		v *= 1.0 + MOVE_TUNING.beat_jump_bonus
+		_beat_puff()
+	jump_grade = BeatGrader.Grade.NONE
 	# Already rising faster than a jump (a drum, an updraft)? Add to it, don't replace it.
 	if velocity.y < -v:
 		velocity.y -= v * MOVE_TUNING.jump_stack_ratio
@@ -215,6 +229,10 @@ func _on_one_way() -> bool:
 
 func _land() -> void:
 	squash = 0.7
+	# Landing on the beat gives a short burst of speed (issue #14).
+	if BeatGrader.is_on_beat(_movement_grade()):
+		flow_t = MOVE_TUNING.flow_time
+		_beat_puff()
 	var fall := feet_y() - (peak_y + size)
 	if diving != "":
 		var d := diving
@@ -256,3 +274,13 @@ func launch(impulse: Vector2) -> void:
 ## Called every frame the player is inside an updraft.
 func add_lift(delta: float) -> void:
 	velocity.y = maxf(velocity.y - MOVE_TUNING.updraft_accel * delta, -MOVE_TUNING.updraft_max_rise)
+
+
+## A small gold ring at the feet: this movement landed on the beat.
+func _beat_puff() -> void:
+	var r := FX.Ring.new()
+	r.team = "none"
+	r.radius = 26.0
+	r.color = Pal.GOLD
+	r.position = global_position + Vector2(0, size)
+	room.add_fx(r)

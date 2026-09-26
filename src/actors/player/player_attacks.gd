@@ -148,6 +148,9 @@ func _start_dash(power: bool, dist := 0.0, dmg := 0.0) -> void:
 	else:
 		dash_t = DASH_TIME
 		dash_speed = DASH_SPEED
+		dash_on_beat = Beat.running and BeatGrader.is_on_beat(BeatGrader.grade(Beat.signed_offset(), stats().beat_window))
+		if dash_on_beat:
+			dash_t *= 1.0 + MOVE_TUNING.beat_dash_bonus
 		dash_cd = DASH_CD * (1.0 - clampf(stats().dash_cdr, 0.0, 0.8))
 		var cut := 0.0
 		if char_id == "eighth":

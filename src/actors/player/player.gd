@@ -25,7 +25,7 @@ func _draw() -> void:
 	col = Color(col, alpha)
 
 	for a in afterimages:
-		Glyph.note(self, kind, to_local(a.p), facing, size, Color(Pal.INK, a.a * 0.35))
+		Glyph.note(self, kind, to_local(a.p), facing, size, Color(Pal.GOLD if dash_on_beat else Pal.INK, a.a * 0.35))
 
 	var stem := -velocity.x * 0.0006 * facing
 	if swing_t > 0.0:
