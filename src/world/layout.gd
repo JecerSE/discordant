@@ -47,6 +47,7 @@ static func _staff(room: Room, rng: RandomNumberGenerator, dens: Array) -> void:
 			if rng.randf() < dens[li]:
 				room.segments.append({"y": room.line_ys[li], "x0": x, "x1": minf(x + length, room.width - 160.0)})
 			x += length + gap
+	PlatformReachability.ensure_reachable(room.segments, room.line_ys, room.width)
 
 
 static func _features(room: Room, rng: RandomNumberGenerator, fam: String, n: int) -> void:
