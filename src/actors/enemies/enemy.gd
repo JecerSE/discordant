@@ -23,6 +23,9 @@ func _ready() -> void:
 	patrol = EnemyPatrol.new(get_instance_id(), home.x)
 	facing = -1.0 if room.player and room.player.global_position.x < global_position.x else 1.0
 	Beat.beat.connect(_on_beat)
+	animator = EnemyAnimator.new()
+	animator.enemy = self
+	add_child(animator)
 
 
 func _physics_process(delta: float) -> void:
@@ -99,7 +102,14 @@ func _draw() -> void:
 		col = Pal.INK.lerp(Pal.HUSH, 0.5)
 	if room.frozen:
 		col = Pal.INK.lerp(Pal.MARGIN, 0.35)
-	draw_body(col)
+	if animator == null or not animator.has_sheet():
+		draw_body(col)
+	else:
+		# A faint violet haze behind the sprite: the Rest clinging to it.
+		draw_circle(Vector2(0, 2), r * 1.05, Color(Pal.HUSH, 0.10))
+		if elite:
+			draw_circle(Vector2.ZERO, r * 1.35, Color(Pal.family_color(family), 0.10 + 0.05 * sin(t * 4.0)))
+	_draw_tether_line()
 
 	if tether_t > 0.0:
 		draw_arc(Vector2.ZERO, r + 8.0, 0, TAU, 24, Color(Pal.STRING, 0.7), 2.0, true)
@@ -194,6 +204,10 @@ func draw_body(col: Color) -> void:
 	draw_circle(Vector2(ex + 3.0, -r * 0.3), 2.2, Pal.PAPER)
 	draw_circle(Vector2(ex - 3.0 + facing, -r * 0.3), 1.0, Pal.BLOOD)
 	draw_circle(Vector2(ex + 3.0 + facing, -r * 0.3), 1.0, Pal.BLOOD)
+
+
+## The wavy string from a Tether or Unison Rest to the player it has caught.
+func _draw_tether_line() -> void:
 	if (state == "tether" or state == "bind") and room.player:
 		var to: Vector2 = to_local(room.player.global_position)
 		var pts := PackedVector2Array()

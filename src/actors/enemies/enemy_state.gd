@@ -54,6 +54,8 @@ var patrol: EnemyPatrol
 var turn_cd := 0.0
 # Super armor for elites and bosses (issue #3).
 var stun_immune_t := 0.0
+## Draws the body as a pixel sprite (created in _ready).
+var animator: EnemyAnimator
 
 
 func setup(enemy_id: String, hp_scale := 1.0, dmg_scale := 1.0) -> void:

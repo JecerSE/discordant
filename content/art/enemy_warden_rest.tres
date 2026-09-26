@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SpriteSheet" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/art/sprite_sheet.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/enemy_warden_rest.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+texture = ExtResource("2")
+frame_size = Vector2i(20, 20)
+origin = Vector2i(10, 11)
+pixel_scale = 3
+animations = {"idle": [0, 1], "windup": [2], "attack": [3]}
+fps = {"idle": 3.0, "windup": 1.0, "attack": 1.0}

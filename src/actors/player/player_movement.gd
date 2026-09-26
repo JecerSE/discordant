@@ -21,6 +21,9 @@ func _ready() -> void:
 	hp = clampf(float(Game.run.get("hp", max_hp)), 1.0, max_hp)
 	jumps_left = int(Game.stats().jumps)
 	Beat.bar.connect(_on_bar)
+	animator = PlayerAnimator.new()
+	animator.player = self as Player
+	add_child(animator)
 	Beat.beat.connect(_on_beat)
 
 

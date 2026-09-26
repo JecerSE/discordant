@@ -10,10 +10,51 @@ var prompt := "Read"
 var radius := 60.0
 var used := false
 var t := 0.0
+## Pixel sprites for this interactable (see _build_sprites). Empty means vector fallback.
+var _body: PixelSprite
+var _figure: PixelSprite
+
+## Sheet per kind; teachers use npc_<id>, statues a plinth plus the note.
+const KIND_SHEETS := {"chest": "prop_chest", "shop": "prop_pedestal", "bench": "prop_bench", "sign": "prop_sign", "statue": "prop_plinth", "scribble": "npc_scribble"}
+
+
+func _ready() -> void:
+	_build_sprites()
+
+
+func _build_sprites() -> void:
+	var sheet_name: String = KIND_SHEETS.get(kind, "")
+	if kind == "teacher":
+		sheet_name = "npc_" + String(data.get("id", ""))
+	var sheet := ArtLibrary.sheet(sheet_name) if sheet_name != "" else null
+	if sheet == null:
+		return
+	_body = PixelSprite.new()
+	_body.sheet = sheet
+	_body.autoplay = &"closed" if kind == "chest" else &"idle"
+	add_child(_body)
+	if kind == "statue":
+		var note_sheet := ArtLibrary.sheet("note_" + String(data.id))
+		if note_sheet:
+			_figure = PixelSprite.new()
+			_figure.sheet = note_sheet
+			# Stand the note on the plinth: its feet are 6 source px below the head centre.
+			_figure.position = Vector2(0, -6 * sheet.pixel_scale - 6 * note_sheet.pixel_scale)
+			add_child(_figure)
 
 
 func _physics_process(delta: float) -> void:
 	t += delta
+	if _body:
+		if kind == "chest":
+			_body.play(&"open" if used else &"closed")
+		_body.visible = not (kind == "scribble" and used)
+		if kind == "scribble":
+			_body.modulate.a = 0.7 + 0.3 * sin(t * 3.0)
+	if _figure:
+		var unlocked := Game.is_unlocked(data.id)
+		_figure.modulate = Color.WHITE if unlocked else Color(0.25, 0.22, 0.28, 0.45)
+		_figure.play(&"idle" if unlocked else &"blink")
 	queue_redraw()
 
 
@@ -53,6 +94,50 @@ func detail() -> Dictionary:
 
 func _draw() -> void:
 	var near: bool = room.player != null and room.player.global_position.distance_to(global_position) < radius
+	if _body == null:
+		_draw_vector(near)
+	else:
+		_draw_overlays()
+	if near and label() != "":
+		draw_arc(Vector2(0, -20), radius * 0.5, 0, TAU, 32, Color(Pal.INK, 0.25), 1.5, true)
+
+
+## Things that aren't art: the shop's item and price, names under teachers and statues.
+func _draw_overlays() -> void:
+	match kind:
+		"shop":
+			if not used:
+				_draw_shop_item(-86.0)
+		"teacher":
+			_draw_teacher_name()
+		"statue":
+			var id: String = data.id
+			var unlocked := Game.is_unlocked(id)
+			if id == Game.meta.get("last_char", "quarter") and unlocked:
+				draw_circle(Vector2(0, -60), 40.0, Color(Pal.GOLD, 0.12 + 0.06 * sin(t * 3.0)))
+			var c := Content.character(id)
+			UI.text(self, Vector2(0, 22), c.name if unlocked else "???", 14, Pal.INK if unlocked else Pal.INK_FAINT, HORIZONTAL_ALIGNMENT_CENTER)
+		"scribble":
+			if not used and room.player != null and room.player.global_position.distance_to(global_position) < radius:
+				draw_circle(Vector2(0, -40), 30.0, Color(Pal.MARGIN, 0.12))
+
+
+func _draw_shop_item(y: float) -> void:
+	var bob := sin(t * 2.5) * 4.0
+	var fam := Content.item_family(data.id)
+	var col := Pal.family_color(fam)
+	draw_circle(Vector2(0, y + bob), 18.0, Color(col, 0.25))
+	_item_icon(Vector2(0, y + bob), data.id, col)
+	var f := Pal.serif_bold()
+	var txt := "%d" % data.price
+	var w := f.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
+	var afford: bool = Game.run.get("sharps", 0) >= data.price
+	draw_string(f, Vector2(-w * 0.5 - 6, 22), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Pal.INK if afford else Pal.BLOOD)
+	Glyph.sharp(self, Vector2(w * 0.5 + 4, 16), 7.0, Pal.GOLD)
+
+
+## Vector drawing, used only when a sprite sheet is missing.
+func _draw_vector(near: bool) -> void:
 	match kind:
 		"chest":
 			Glyph.chest(self, Vector2(0, -18), 26.0, Pal.INK, Pal.family_color(room.family), used)
@@ -113,8 +198,6 @@ func _draw() -> void:
 				draw_line(Vector2(-30, -70 + i * 11), Vector2(30 - i * 12, -70 + i * 11), Pal.INK_SOFT, 2.0)
 		"keeper":
 			pass
-	if near and label() != "":
-		draw_arc(Vector2(0, -20), radius * 0.5, 0, TAU, 32, Color(Pal.INK, 0.25), 1.5, true)
 
 
 func _item_icon(at: Vector2, id: String, col: Color) -> void:
@@ -186,9 +269,10 @@ func _draw_teacher() -> void:
 			draw_arc(Vector2(10, -36), 7.0, 0.3, 2.8, 8, Pal.INK, 2.0)
 			draw_line(Vector2(-24, -98), Vector2(24, -98), Pal.INK, 4.0)
 			draw_rect(Rect2(-14, -118, 28, 20), Pal.INK)
-	var f := Pal.serif()
+	_draw_teacher_name()
+
+
+func _draw_teacher_name() -> void:
+	var who: String = data.get("id", "")
 	var nm: String = Content.TEACHERS[who].name if Content.TEACHERS.has(who) else ""
-	if who == "bflat":
-		nm = "B♭, a flat who deals in sharps"
-	var w := f.get_string_size(nm, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
-	draw_string(f, Vector2(-w * 0.5, 20), nm, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Pal.INK_SOFT)
+	UI.text(self, Vector2(0, 20), nm, 13, Pal.INK_SOFT, HORIZONTAL_ALIGNMENT_CENTER)

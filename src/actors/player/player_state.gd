@@ -95,6 +95,8 @@ var combo_tracker: ComboTracker
 var jump_grade: BeatGrader.Grade = BeatGrader.Grade.NONE
 var flow_t := 0.0
 var dash_on_beat := false
+## Draws the body as a pixel sprite (created in _ready).
+var animator: PlayerAnimator
 
 
 func refresh_stats() -> void:
