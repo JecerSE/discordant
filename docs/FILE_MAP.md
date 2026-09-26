@@ -69,3 +69,28 @@ src/
 ```
 
 Largest files now: `powers.gd` 299, `player_damage.gd` 280, `glyph.gd` 266, `synth.gd` 253.
+
+## Added while fixing the playtest issues (2026-09-25)
+
+Every tuning number for these lives in a `.tres` file under `content/`, edited in the inspector.
+
+| File | What it is | Issue |
+| --- | --- | --- |
+| `content/tuning/*.tres` + `src/data/tuning/*_tuning.gd` | Tuning resources: feedback, enemy, player movement, level generation, timing, music, Timpani | all |
+| `content/combat/*_attacks.tres` + `src/data/combat/attack_step.gd`, `attack_set.gd` | Each character's attack chain and down strike as data | #10 |
+| `content/combat/*_combos.tres` + `src/data/combat/combo_pattern.gd`, `combo_set.gd` | Each character's rhythm combos as data | #11 |
+| `src/actors/player/melee_swing.gd` | A hitbox that follows the player through a swing | #10 |
+| `src/actors/player/beat_grader.gd` | Perfect / great / good / miss grades and their damage | #12 |
+| `src/actors/player/combo_tracker.gd`, `combo_finishers.gd` | Spotting rhythm patterns and what each finisher does | #11 |
+| `src/actors/player/powers/` | `powers.gd` (front door) plus one file per family | #29 |
+| `src/actors/enemies/enemy_patrol.gd` | Idle wandering near spawn | #2 |
+| `src/world/generation/` | `platform_reachability.gd`, `feature_placer.gd`, `wave_plan.gd`, `wave_planner.gd`, `spawn_picker.gd`, `bar_planner.gd` | #4 #7 #8 #25 |
+| `src/world/room/damage_numbers.gd`, `src/fx/effects/damage_number.gd` | Merged damage numbers | #1 |
+| `src/data/content/item_requirements.gd` | Which items need which skill | #26 |
+| `src/ui/hud/` | The HUD, one widget per file | #5 #19 #20 |
+| `src/ui/map/` | The map drawn as a score | #24 |
+| `src/input/input_bindings.gd`, `src/ui/input_labels.gd` | Rebindable actions, saving them, readable key names | #16 #17 |
+| `src/ui/settings_menu.gd`, `controls_menu.gd`, `pause_menu.gd` | Settings with sliders, rebinding screen, slim pause menu | #16 #18 |
+| `src/debug/` | God mode and testing shortcuts (F1 in debug builds, or `-- --debug-menu`) | #21 |
+| `tools/test_generation.gd`, `test_combat.gd`, `test_menus.gd` | Headless rule tests | |
+| `tools/gen_combat_tres.py` | Writes the combat `.tres` files from tables | |
