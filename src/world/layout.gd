@@ -4,16 +4,19 @@ class_name Layout
 ## features (drums, updrafts, harmonic nodes).
 
 
+const TUNING: LevelGenTuning = preload("res://content/tuning/level_gen_tuning.tres")
+
+
 static func build(room: Room) -> void:
 	var rng := room.rng
 	var fam := room.family
 	match room.type:
 		"combat":
-			room.width = 1900.0 + rng.randf_range(0, 700) + (200.0 if fam == "wind" else 0.0)
+			room.width = TUNING.combat_width_min + rng.randf_range(0, TUNING.combat_width_extra) + (TUNING.wind_width_bonus if fam == "wind" else 0.0)
 			_staff(room, rng, _densities(fam))
 			_features(room, rng, fam, 2 + rng.randi() % 2)
 		"elite":
-			room.width = 1600.0
+			room.width = TUNING.elite_width
 			_staff(room, rng, _densities(fam))
 			_features(room, rng, fam, 2)
 		"boss":
@@ -40,12 +43,12 @@ static func _densities(fam: String) -> Array:
 
 static func _staff(room: Room, rng: RandomNumberGenerator, dens: Array) -> void:
 	for li in 5:
-		var x := 220.0 + rng.randf_range(0, 200)
-		while x < room.width - 260.0:
-			var length := rng.randf_range(200, 560)
-			var gap := rng.randf_range(120, 280) + li * 20.0
+		var x := TUNING.start_margin + rng.randf_range(0, 200)
+		while x < room.width - TUNING.start_margin - 40.0:
+			var length := rng.randf_range(TUNING.segment_length_min, TUNING.segment_length_max)
+			var gap := rng.randf_range(TUNING.gap_min, TUNING.gap_max) + li * TUNING.gap_per_line
 			if rng.randf() < dens[li]:
-				room.segments.append({"y": room.line_ys[li], "x0": x, "x1": minf(x + length, room.width - 160.0)})
+				room.segments.append({"y": room.line_ys[li], "x0": x, "x1": minf(x + length, room.width - TUNING.end_margin)})
 			x += length + gap
 	PlatformReachability.ensure_reachable(room.segments, room.line_ys, room.width)
 

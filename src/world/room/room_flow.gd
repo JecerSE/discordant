@@ -48,7 +48,7 @@ func _clear() -> void:
 		Layout.place_scribble(self as Room)
 	if type == "elite" and elite_drop != "":
 		_after(1.2, _elite_reward)
-	elif type == "combat" and rng.randf() < 0.25:
+	elif type == "combat" and rng.randf() < Layout.TUNING.bonus_drop_chance:
 		_after(1.0, _loose_page)
 
 

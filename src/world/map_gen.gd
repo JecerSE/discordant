@@ -14,43 +14,7 @@ static func generate(page_id: String, seed_value: int) -> Dictionary:
 	elif page_id == "grand":
 		layers = [["boss"]]
 	else:
-		# Entry, four branching layers, the fermata before the keeper, the keeper.
-		var middle: Array = []
-		var counts := [2, 3, 3, 2]
-		var pool: Array = ["elite", "shop", "chest", "teach"]
-		for c in counts:
-			var layer: Array = []
-			for i in c:
-				layer.append("combat")
-			middle.append(layer)
-		# Scatter the specials so each appears once, never two on the same layer.
-		pool.shuffle()
-		var placements := {"elite": [1, 2], "shop": [1, 2, 3], "chest": [0, 1, 2], "teach": [0, 1, 2, 3]}
-		var used_layers := {}
-		for t in pool:
-			var options: Array = placements[t].duplicate()
-			var chosen := -1
-			for tries in 12:
-				var li: int = options[rng.randi() % options.size()]
-				if not used_layers.has(li):
-					chosen = li
-					break
-			if chosen == -1:
-				chosen = options[rng.randi() % options.size()]
-			used_layers[chosen] = true
-			var slot: int = rng.randi() % middle[chosen].size()
-			for k in middle[chosen].size():
-				var idx: int = (slot + k) % middle[chosen].size()
-				if middle[chosen][idx] == "combat":
-					middle[chosen][idx] = t
-					break
-		# A second elite for the brave, on the last branching layer.
-		if rng.randf() < 0.6:
-			middle[3][rng.randi() % middle[3].size()] = "elite"
-		layers = [["combat"]]
-		layers.append_array(middle)
-		layers.append(["rest", "chest"] if rng.randf() < 0.35 else ["rest"])
-		layers.append(["boss"])
+		layers = BarPlanner.plan_layers(rng)
 
 	var nodes: Array = []
 	var by_layer: Array = []
