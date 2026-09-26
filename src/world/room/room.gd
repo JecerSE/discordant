@@ -133,6 +133,8 @@ func _physics_process(delta: float) -> void:
 					_next_wave()
 				state = "fight"
 		"fight":
+			if type != "boss":
+				_check_reinforcements()
 			if type != "boss" and alive_enemies().is_empty() and pending_spawns <= 0:
 				if wave_i + 1 < waves.size():
 					_spawn_delay -= delta

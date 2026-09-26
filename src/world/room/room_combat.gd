@@ -2,60 +2,47 @@ class_name RoomCombat
 extends RoomState
 ## Layer 2 of 4. Waves, spawning, the enemy lists, the Fermata freeze.
 
+
 func _build_waves() -> void:
 	var page: Dictionary = Content.PAGES[page_id]
 	var pool: Array = page.get("enemies", ["quarter_rest"])
-	var pi: int = Game.run.get("page_i", 0)
+	var bar_index: int = Game.run.get("page_i", 0)
 	if type == "elite":
 		var elites: Array = page.get("elites", ["timpanist"])
-		var e: String = elites[rng.randi() % elites.size()]
-		elite_drop = e
-		waves = [[pool[rng.randi() % pool.size()]], [e, pool[rng.randi() % pool.size()]]]
+		elite_drop = elites[rng.randi() % elites.size()]
+		waves = WavePlanner.plan_elite(pool, elite_drop, rng)
 		return
-	var n_waves := 2 + (1 if pi >= 1 and rng.randf() < 0.5 else 0)
-	for w in n_waves:
-		var wave: Array = []
-		var count := 3 + pi + rng.randi() % 2 + (1 if w == n_waves - 1 else 0)
-		for i in mini(count, 8):
-			var pick: String = pool[rng.randi() % pool.size()]
-			# One breath reed per wave is plenty.
-			if pick == "breath_well" and wave.has("breath_well"):
-				pick = pool[0]
-			wave.append(pick)
-		waves.append(wave)
+	waves = WavePlanner.plan_fight(pool, bar_index, rng)
 
 
 func _next_wave() -> void:
 	wave_i += 1
 	_spawn_delay = 0.9
-	for id in waves[wave_i]:
+	_spawn_group(waves[wave_i].enemies, false)
+
+
+## Once half of the current wave is down, its reinforcements (if any) arrive from the
+## sides of the room.
+func _check_reinforcements() -> void:
+	if wave_i < 0 or wave_i >= waves.size():
+		return
+	var plan: WavePlan = waves[wave_i]
+	if plan.reinforcements_sent or plan.reinforcements.is_empty() or pending_spawns > 0:
+		return
+	if alive_enemies().size() * 2 <= plan.size():
+		plan.reinforcements_sent = true
+		_spawn_group(plan.reinforcements, true)
+		announce("", "more rests arrive", Pal.HUSH)
+
+
+func _spawn_group(ids: Array[String], from_edges: bool) -> void:
+	var taken: Array[Vector2] = []
+	for id in ids:
 		var elite: bool = Content.ENEMIES[id].get("elite", false)
-		_telegraph_spawn(id, _spawn_point(id), elite)
+		var p := SpawnPicker.pick(self, id, rng, taken, from_edges)
+		taken.append(p)
+		_telegraph_spawn(id, p, elite)
 	Synth.sfx_play("spawn", -6.0)
-
-
-func _spawn_point(id: String) -> Vector2:
-	var def: Dictionary = Content.ENEMIES[id]
-	var flying: bool = def.ai in ["flyer", "shooter", "gust", "echo", "elite_piper", "elite_violist", "motif", "dasher", "phantom"]
-	for tries in 30:
-		var p := Vector2.ZERO
-		if flying:
-			p = Vector2(rng.randf_range(200, width - 150), rng.randf_range(150, 420))
-		elif def.ai == "well":
-			p = Vector2(rng.randf_range(400, width - 250), floor_y - 30.0)
-		elif def.ai == "dropper":
-			var y: float = line_ys[rng.randi_range(2, 4)]
-			p = Vector2(rng.randf_range(200, width - 150), y + 40.0)
-		elif rng.randf() < 0.45 and segments.size() > 0:
-			var s: Dictionary = segments[rng.randi() % segments.size()]
-			if s.x1 - s.x0 < 80.0:
-				continue
-			p = Vector2(rng.randf_range(s.x0 + 30, s.x1 - 30), s.y - 30.0)
-		else:
-			p = Vector2(rng.randf_range(260, width - 120), floor_y - 30.0)
-		if player == null or p.distance_to(player.global_position) > 300.0:
-			return p
-	return Vector2(width * 0.7, floor_y - 30.0)
 
 
 func _telegraph_spawn(id: String, p: Vector2, elite: bool) -> void:
