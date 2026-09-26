@@ -48,7 +48,7 @@ func _ready() -> void:
 	player.add_child(cam)
 	cam.make_current()
 
-	hud = preload("res://src/ui/hud.gd").new()
+	hud = Hud.new()
 	hud.room = self
 	add_child(hud)
 
@@ -165,7 +165,7 @@ func _interaction() -> void:
 		if d < it.radius and d < bd and it.label() != "":
 			bd = d
 			best = it
-	hud.prompt = best.label() if best else ""
+	hud.set_prompt(best)
 	if best and overlay == null and (Input.is_action_just_pressed("interact") or Input.is_action_just_pressed("up")):
 		Events.interact(self, best)
 
