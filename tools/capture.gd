@@ -85,6 +85,10 @@ func _run() -> void:
 	room2.open_overlay(load("res://src/ui/loadout.gd").new())
 	await _wait(10)
 	await _shot(game, "13_loadout", dir)
+	for spec in [["settings_menu.gd", "14_settings"], ["controls_menu.gd", "15_controls"]]:
+		room2.open_overlay(load("res://src/ui/" + spec[0]).new())
+		await _wait(10)
+		await _shot(game, spec[1], dir)
 	room2.open_overlay(load("res://src/debug/debug_menu.gd").new())
 	await _wait(10)
 	await _shot(game, "16_debug", dir)

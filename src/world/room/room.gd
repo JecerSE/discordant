@@ -151,7 +151,7 @@ func _physics_process(delta: float) -> void:
 			_leave()
 		_interaction()
 
-	if Input.is_action_just_pressed("pause") and overlay == null:
+	if (Input.is_action_just_pressed("pause") or Input.is_action_just_pressed("ui_cancel")) and overlay == null:
 		open_overlay(preload("res://src/ui/pause_menu.gd").new())
 	elif DebugTools.enabled() and Input.is_action_just_pressed(DebugTools.ACTION) and overlay == null:
 		open_overlay(DebugMenu.new())

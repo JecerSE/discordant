@@ -1,13 +1,13 @@
 class_name PauseMenu
 extends Overlay
-## Pause: resume, settings, give up / back to title, quit.
+## Pause: resume, settings, controls, give up / back to title, quit.
 
 var sel := 0
 var _rects: Array[Rect2] = []
 
 
 func _items() -> Array[String]:
-	var a: Array[String] = ["Resume", "Settings"]
+	var a: Array[String] = ["Resume", "Settings", "Controls"]
 	a.append("Give up this run" if Game.has_run() else "Back to title")
 	a.append("Quit to desktop")
 	return a
@@ -44,6 +44,8 @@ func _activate(k: int) -> void:
 			close()
 		"Settings":
 			replace_with(SettingsMenu.new())
+		"Controls":
+			replace_with(ControlsMenu.new())
 		"Give up this run":
 			close()
 			Game.end_run("")

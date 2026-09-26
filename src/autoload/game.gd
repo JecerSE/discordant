@@ -9,8 +9,8 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	if OS.get_cmdline_args().has("--script") or OS.get_cmdline_args().has("-s"):
 		save_path = TEST_SAVE_PATH
-	_setup_input()
 	load_save()
+	_setup_input()
 	Synth.apply_volumes()
 	if settings.get("fullscreen", false):
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)

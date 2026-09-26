@@ -27,6 +27,8 @@ No install needed. On Windows, SmartScreen may warn you because the exe isn't si
 | Runes | Tab | Back |
 | Pause | Esc | Start |
 
+Every control can be rebound in Pause → Controls (keyboard, mouse and controller).
+
 ## What's in it
 
 - 4 characters: Quarter Note, Mundo (Whole Note), Half Note, Eighth Note

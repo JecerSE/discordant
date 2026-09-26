@@ -26,51 +26,19 @@ var _stats_dirty := true
 var save_path := SAVE_PATH
 
 
+## Registers all actions with their defaults, then the player's saved bindings.
 ## Debug menu: take no damage (issue #21). Not saved.
 var god_mode := false
 
 func _setup_input() -> void:
-	var map := {
-		"move_left": [KEY_A, KEY_LEFT, "pad:" + str(JOY_BUTTON_DPAD_LEFT), "axis:0:-1"],
-		"move_right": [KEY_D, KEY_RIGHT, "pad:" + str(JOY_BUTTON_DPAD_RIGHT), "axis:0:1"],
-		"up": [KEY_W, KEY_UP, "pad:" + str(JOY_BUTTON_DPAD_UP), "axis:1:-1"],
-		"down": [KEY_S, KEY_DOWN, "pad:" + str(JOY_BUTTON_DPAD_DOWN), "axis:1:1"],
-		"jump": [KEY_SPACE, KEY_Z, "pad:" + str(JOY_BUTTON_A)],
-		"attack": [KEY_J, KEY_X, "mouse:1", "pad:" + str(JOY_BUTTON_X)],
-		"power1": [KEY_K, KEY_C, "mouse:2", "pad:" + str(JOY_BUTTON_Y)],
-		"power2": [KEY_L, KEY_V, "pad:" + str(JOY_BUTTON_B)],
-		"power3": [KEY_U, KEY_B, "pad:" + str(JOY_BUTTON_LEFT_SHOULDER)],
-		"dash": [KEY_SHIFT, KEY_I, "pad:" + str(JOY_BUTTON_RIGHT_SHOULDER)],
-		"interact": [KEY_E, KEY_F, "pad:" + str(JOY_BUTTON_LEFT_STICK)],
-		"pause": [KEY_ESCAPE, KEY_P, "pad:" + str(JOY_BUTTON_START)],
-		"loadout": [KEY_TAB, KEY_Q, "pad:" + str(JOY_BUTTON_BACK)],
-	}
-	for action in map:
-		if not InputMap.has_action(action):
-			InputMap.add_action(action, 0.35)
-		for spec in map[action]:
-			var ev: InputEvent
-			if spec is int:
-				var k := InputEventKey.new()
-				k.physical_keycode = spec
-				ev = k
-			elif String(spec).begins_with("pad:"):
-				var j := InputEventJoypadButton.new()
-				j.button_index = int(String(spec).substr(4))
-				ev = j
-			elif String(spec).begins_with("axis:"):
-				var parts := String(spec).split(":")
-				var m := InputEventJoypadMotion.new()
-				m.axis = int(parts[1])
-				m.axis_value = float(parts[2])
-				ev = m
-			elif String(spec).begins_with("mouse:"):
-				var mb := InputEventMouseButton.new()
-				mb.button_index = int(String(spec).substr(6))
-				ev = mb
-			if ev:
-				InputMap.action_add_event(action, ev)
+	InputBindings.install(settings.get("bindings", {}))
 	DebugTools.install()
+
+
+## Saves the current bindings with the rest of the settings.
+func save_bindings() -> void:
+	settings["bindings"] = InputBindings.serialize()
+	save()
 
 
 func load_save() -> void:
