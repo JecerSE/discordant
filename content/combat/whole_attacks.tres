@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="AttackSet" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://src/data/combat/attack_set.gd" id="1"]
+[ext_resource type="Script" path="res://src/data/combat/attack_step.gd" id="2"]
+
+[sub_resource type="Resource" id="step_1"]
+script = ExtResource("2")
+damage = 24.0
+cadence = 0.56
+active_time = 0.12
+shape = 1
+offset = Vector2(26, 0)
+size = Vector2(78, 0)
+knock = Vector2(420, -160)
+slash_radius = 0.0
+
+[resource]
+script = ExtResource("1")
+steps = Array[ExtResource("2")]([SubResource("step_1")])
+combo_reset = 0.0
+pogo_speed = 0.0
+beat_division = 1

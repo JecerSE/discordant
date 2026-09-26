@@ -1,0 +1,68 @@
+[gd_resource type="Resource" script_class="AttackSet" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://src/data/combat/attack_set.gd" id="1"]
+[ext_resource type="Script" path="res://src/data/combat/attack_step.gd" id="2"]
+
+[sub_resource type="Resource" id="step_1"]
+script = ExtResource("2")
+damage = 7.0
+cadence = 0.16
+active_time = 0.07
+offset = Vector2(38, -4)
+size = Vector2(68, 46)
+knock = Vector2(140, -60)
+lunge = 520.0
+slash_radius = 40.0
+
+[sub_resource type="Resource" id="step_2"]
+script = ExtResource("2")
+damage = 7.0
+cadence = 0.16
+active_time = 0.07
+offset = Vector2(38, -4)
+size = Vector2(68, 46)
+knock = Vector2(140, -60)
+lunge = 520.0
+slash_radius = 40.0
+slash_flip = true
+
+[sub_resource type="Resource" id="step_3"]
+script = ExtResource("2")
+damage = 7.0
+cadence = 0.16
+active_time = 0.07
+offset = Vector2(38, -4)
+size = Vector2(68, 46)
+knock = Vector2(140, -60)
+lunge = 520.0
+slash_radius = 40.0
+
+[sub_resource type="Resource" id="step_4"]
+script = ExtResource("2")
+damage = 12.0
+cadence = 0.16
+active_time = 0.07
+offset = Vector2(38, -4)
+size = Vector2(68, 46)
+knock = Vector2(140, -60)
+lunge = 520.0
+slash_radius = 40.0
+slash_flip = true
+
+[sub_resource type="Resource" id="down_strike"]
+script = ExtResource("2")
+damage = 9.0
+cadence = 0.2
+active_time = 0.08
+offset = Vector2(0, 30)
+size = Vector2(50, 64)
+knock = Vector2(0, 340)
+slash_radius = 38.0
+
+[resource]
+script = ExtResource("1")
+steps = Array[ExtResource("2")]([SubResource("step_1"), SubResource("step_2"), SubResource("step_3"), SubResource("step_4")])
+combo_reset = 0.45
+pogo_speed = 700.0
+beat_division = 2
+down_strike = SubResource("down_strike")
