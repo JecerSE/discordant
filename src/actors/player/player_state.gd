@@ -11,6 +11,7 @@ const DASH_TIME := 0.15
 const DASH_CD := 0.75
 const COYOTE := 0.1
 const BUFFER := 0.13
+const MOVE_TUNING: PlayerMovementTuning = preload("res://content/tuning/player_movement_tuning.tres")
 
 var room: Node
 var char_id := "quarter"
@@ -81,6 +82,9 @@ var bound_by: Node = null
 var marks := 0
 var marks_t := 0.0
 var stagger_t := 0.0
+# Momentum carry and launches (issue #15).
+var momentum_t := 0.0
+var launch_lock := 0.0
 
 
 func refresh_stats() -> void:

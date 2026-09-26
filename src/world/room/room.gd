@@ -220,13 +220,12 @@ func _update_features(delta: float) -> void:
 			"drum":
 				ft.squash = move_toward(ft.get("squash", 0.0), 0.0, delta * 4.0)
 				if player.velocity.y >= 0.0 and absf(player.global_position.x - ft.pos.x) < 42.0 and absf(player.feet_y() - (ft.pos.y - 30.0)) < 14.0:
-					player.velocity.y = -1180.0
-					player.jumps_left = int(Game.stats().jumps) - 1 if Game.has_run() else 1
+					player.launch(Vector2(0.0, -Player.MOVE_TUNING.drum_launch_speed))
 					ft.squash = 1.0
 					Synth.sfx_play("tom", -4.0, 2.0)
 			"updraft":
 				if absf(player.global_position.x - ft.pos.x) < ft.w * 0.5:
-					player.velocity.y = maxf(player.velocity.y - 3400.0 * delta, -560.0)
+					player.add_lift(delta)
 			"harmonic":
 				ft.cd = maxf(0.0, ft.get("cd", 0.0) - delta)
 

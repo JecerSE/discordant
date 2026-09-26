@@ -281,3 +281,5 @@ func add_push(v: Vector2) -> void:
 	if char_id == "whole":
 		v *= 0.4
 	push += v
+	if absf(v.x) >= MOVE_TUNING.momentum_push_threshold:
+		momentum_t = MOVE_TUNING.momentum_carry_time

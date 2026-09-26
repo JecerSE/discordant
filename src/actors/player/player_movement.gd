@@ -50,7 +50,7 @@ func _physics_process(delta: float) -> void:
 		facing = signf(dir)
 
 	var on_floor := is_on_floor()
-	if on_floor:
+	if on_floor and launch_lock <= 0.0:
 		coyote = COYOTE
 		jumps_left = int(s.jumps) - 1
 		if not _was_floor:
@@ -68,6 +68,8 @@ func _physics_process(delta: float) -> void:
 	if diving != "":
 		target = 0.0
 	var accel := 3200.0 if on_floor else 2200.0
+	if momentum_t > 0.0 and not on_floor:
+		accel *= MOVE_TUNING.momentum_air_control
 	velocity.x = move_toward(velocity.x, target, accel * delta)
 
 	# Vertical.
@@ -142,6 +144,8 @@ func _timers(delta: float) -> void:
 	parry_t -= delta
 	blink_t -= delta
 	stagger_t -= delta
+	momentum_t -= delta
+	launch_lock -= delta
 	if marks > 0:
 		marks_t -= delta
 		if marks_t <= 0.0:
@@ -189,7 +193,11 @@ func _timers(delta: float) -> void:
 
 
 func _jump(v: float) -> void:
-	velocity.y = -v
+	# Already rising faster than a jump (a drum, an updraft)? Add to it, don't replace it.
+	if velocity.y < -v:
+		velocity.y -= v * MOVE_TUNING.jump_stack_ratio
+	else:
+		velocity.y = -v
 	jump_buf = 0.0
 	squash = 1.25
 	Synth.sfx_play("jump", -14.0, 1.0)
@@ -227,3 +235,23 @@ func _land() -> void:
 			room.add_fx(r)
 	if Game.flag("land_shock") > 0.0 and fall > 180.0:
 		Powers.spawn_shockwaves(self as Player, 14.0)
+
+
+## Called by launchers (drum pads, bounce effects). Keeps horizontal momentum, never
+## lowers an upward speed that's already higher, and skips the grounded reset for a
+## moment so a jump right after uses an air jump instead of replacing the launch.
+func launch(impulse: Vector2) -> void:
+	if impulse.y < 0.0:
+		velocity.y = minf(velocity.y, impulse.y)
+	else:
+		velocity.y += impulse.y
+	velocity.x += impulse.x
+	coyote = 0.0
+	jumps_left = int(stats().jumps) - 1
+	launch_lock = MOVE_TUNING.launch_lock_time
+	momentum_t = MOVE_TUNING.momentum_carry_time
+
+
+## Called every frame the player is inside an updraft.
+func add_lift(delta: float) -> void:
+	velocity.y = maxf(velocity.y - MOVE_TUNING.updraft_accel * delta, -MOVE_TUNING.updraft_max_rise)

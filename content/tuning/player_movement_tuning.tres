@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PlayerMovementTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/tuning/player_movement_tuning.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+jump_stack_ratio = 0.35
+momentum_carry_time = 0.35
+momentum_air_control = 0.35
+momentum_push_threshold = 200.0
+launch_lock_time = 0.08
+drum_launch_speed = 1180.0
+updraft_accel = 3400.0
+updraft_max_rise = 560.0
+beat_jump_bonus = 0.12
+beat_dash_bonus = 0.35
+flow_time = 0.5
+flow_speed_bonus = 0.15
