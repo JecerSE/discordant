@@ -22,6 +22,21 @@ func _in_intro() -> bool:
 	return main.current != null and main.current.get_script().resource_path.ends_with("intro_cutscene.gd")
 
 
+## Waits until cond() is true, at most WAIT_LIMIT frames. On a stall it says what it was
+## waiting for and quits, instead of leaving a frozen window.
+const WAIT_LIMIT := 60 * 60
+
+
+func _wait_until(cond: Callable, what: String) -> bool:
+	for i in WAIT_LIMIT:
+		if cond.call():
+			return true
+		await process_frame
+	push_error("capture: gave up waiting for %s after %d frames" % [what, WAIT_LIMIT])
+	quit(1)
+	return false
+
+
 func _wait(n: int) -> void:
 	for i in n:
 		await physics_frame
@@ -37,21 +52,22 @@ func _run() -> void:
 	main = load("res://src/main.tscn").instantiate()
 	root.add_child(main)
 	# The prologue plays on first launch. Jump to each shot and grab one frame of it.
-	while not _in_intro():
-		await process_frame
+	if not await _wait_until(func(): return _in_intro(), "the intro to start"):
+		return
 	var shots: Array = load("res://src/data/content/intro_data.gd").SHOTS
 	for shot_i in shots.size():
 		var intro = main.current
 		intro._shot_i = shot_i - 1
 		intro._next_shot()
 		intro._bars = 1.0
-		while _in_intro() and intro._t < shots[shot_i].time * 0.6:
-			await process_frame
+		var limit: float = shots[shot_i].time * 0.6
+		if not await _wait_until(func(): return not _in_intro() or intro._t >= limit, "shot %d to play" % shot_i):
+			return
 		if not _in_intro():
 			break
 		await _shot(game, "00_intro_%d_%s" % [shot_i, shots[shot_i].kind], dir)
-	while _in_intro():
-		await process_frame
+	if not await _wait_until(func(): return not _in_intro(), "the intro to hand over to the title"):
+		return
 	await _wait(40)
 	await _shot(game, "01_title", dir)
 

@@ -64,6 +64,8 @@ func _run() -> void:
 	await _frames(30)
 	# The prologue plays through on its own and hands over to the title.
 	game.goto("intro")
+	# Screen changes are deferred; let the intro actually replace the title first.
+	await _frames(3)
 	var waited := 0
 	while waited < 60 * 60 and not (main.current is Control and main.current.get_script() == load("res://src/ui/title.gd")):
 		await _frames(1)
