@@ -62,6 +62,13 @@ func _run() -> void:
 	await _frames(30)
 	game.goto("title")
 	await _frames(30)
+	# The prologue plays through on its own and hands over to the title.
+	game.goto("intro")
+	var waited := 0
+	while waited < 60 * 60 and not (main.current is Control and main.current.get_script() == load("res://src/ui/title.gd")):
+		await _frames(1)
+		waited += 1
+	print("[smoke] intro reached the title after %d frames" % waited)
 	print("[smoke] done, frames ", frames)
 	quit()
 

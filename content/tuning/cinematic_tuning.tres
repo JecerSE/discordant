@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="CinematicTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/tuning/cinematic_tuning.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+letterbox_height = 92.0
+letterbox_slide = 0.8
+type_speed = 38.0
+caption_size = 24
+skip_hint_time = 3.5
+shake_strength = 14.0
+shake_decay = 40.0
+flash_time = 0.25
+logo_scale = 6
+logo_center = Vector2(640, 196)
+slam_from_scale = 2.6
+slam_time = 0.14
+title_drift = 14.0
+title_fall_time = 4.5
+fade_color = Color(0.05, 0.045, 0.09, 1)
+fade_time = 0.35

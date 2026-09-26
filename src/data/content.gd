@@ -22,7 +22,7 @@ const CLIMB = PagesData.CLIMB
 const CLEFS = PagesData.CLEFS
 const TEACHERS = StoryData.TEACHERS
 const MARGIN_INTRO = StoryData.MARGIN_INTRO
-const PROLOGUE = StoryData.PROLOGUE
+const INTRO_SHOTS = IntroData.SHOTS
 const ENDINGS = StoryData.ENDINGS
 
 

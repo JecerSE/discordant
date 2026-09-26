@@ -63,7 +63,9 @@ def main():
             count += 1
     try:
         import env
+        import logo
         count += env.build(ROOT, preview_dir)
+        count += logo.build(ROOT, preview_dir)
     except ModuleNotFoundError:
         pass
     print("wrote %d sheets" % count)

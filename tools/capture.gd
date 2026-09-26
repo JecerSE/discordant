@@ -17,6 +17,11 @@ func _shot(game, name: String, dir: String) -> void:
 	print("saved ", name)
 
 
+## Checked by path: naming IntroCutscene here would pull autoloads into a --script file.
+func _in_intro() -> bool:
+	return main.current != null and main.current.get_script().resource_path.ends_with("intro_cutscene.gd")
+
+
 func _wait(n: int) -> void:
 	for i in n:
 		await physics_frame
@@ -27,10 +32,26 @@ func _run() -> void:
 	var dir: String = args[0] if args.size() > 0 else "user://shots"
 	DirAccess.make_dir_recursive_absolute(dir)
 	await process_frame
+	var game = root.get_node("Game")
+	game.meta.seen_prologue = false
 	main = load("res://src/main.tscn").instantiate()
 	root.add_child(main)
-	var game = root.get_node("Game")
-	game.meta.seen_prologue = true
+	# The prologue plays on first launch. Jump to each shot and grab one frame of it.
+	while not _in_intro():
+		await process_frame
+	var shots: Array = load("res://src/data/content/intro_data.gd").SHOTS
+	for shot_i in shots.size():
+		var intro = main.current
+		intro._shot_i = shot_i - 1
+		intro._next_shot()
+		intro._bars = 1.0
+		while _in_intro() and intro._t < shots[shot_i].time * 0.6:
+			await process_frame
+		if not _in_intro():
+			break
+		await _shot(game, "00_intro_%d_%s" % [shot_i, shots[shot_i].kind], dir)
+	while _in_intro():
+		await process_frame
 	await _wait(40)
 	await _shot(game, "01_title", dir)
 

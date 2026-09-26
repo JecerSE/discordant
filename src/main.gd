@@ -1,5 +1,8 @@
 extends Node
-## Holds whichever screen is showing and fades between them.
+## Holds whichever screen is showing and fades between them. The first launch opens
+## on the prologue cutscene; after that, on the title.
+
+const CINEMATIC: CinematicTuning = preload("res://content/tuning/cinematic_tuning.tres")
 
 var current: Node
 var _fade: ColorRect
@@ -13,11 +16,11 @@ func _ready() -> void:
 	_layer.layer = 50
 	add_child(_layer)
 	_fade = ColorRect.new()
-	_fade.color = Pal.PAPER
+	_fade.color = CINEMATIC.fade_color
 	_fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_layer.add_child(_fade)
-	show_screen("title", {})
+	show_screen("title" if Game.meta.get("seen_prologue", false) else "intro", {})
 
 
 func show_screen(screen: String, args: Dictionary) -> void:
@@ -34,6 +37,9 @@ func _swap(screen: String, args: Dictionary) -> void:
 	match screen:
 		"title":
 			n = preload("res://src/ui/title.gd").new()
+			n.from_intro = args.get("from_intro", false)
+		"intro":
+			n = IntroCutscene.new()
 		"hub":
 			Game.preview_run(Game.meta.get("last_char", "quarter"))
 			n = Room.new()
@@ -49,6 +55,10 @@ func _swap(screen: String, args: Dictionary) -> void:
 	current = n
 	add_child(n)
 	move_child(_layer, -1)
+	# The intro's last frame already is the title, so that change is a straight cut.
+	if args.get("from_intro", false):
+		_fade.modulate.a = 0.0
+		return
 	_fade.modulate.a = 1.0
 	var tw := create_tween()
-	tw.tween_property(_fade, "modulate:a", 0.0, 0.35)
+	tw.tween_property(_fade, "modulate:a", 0.0, CINEMATIC.fade_time)

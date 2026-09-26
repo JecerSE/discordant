@@ -38,3 +38,9 @@ func fps_of(anim: StringName) -> float:
 
 func region(frame: int) -> Rect2:
 	return Rect2(frame * frame_size.x, 0, frame_size.x, frame_size.y)
+
+
+## The frame an animation shows t seconds after it started, looping.
+func frame_at(anim: StringName, t: float) -> int:
+	var frames := frames_of(anim)
+	return int(frames[int(t * fps_of(anim)) % frames.size()])
