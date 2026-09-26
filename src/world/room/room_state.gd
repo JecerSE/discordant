@@ -52,6 +52,9 @@ var _bg: Node2D
 
 
 var damage_numbers := DamageNumbers.new()
+## Most enemies alive or arriving at once this room, for the music muffle.
+var hush_peak := 0
+const MUSIC_TUNING: MusicTuning = preload("res://content/tuning/music_tuning.tres")
 
 
 func setup(args: Dictionary) -> void:
@@ -98,10 +101,6 @@ func ground_below(p: Vector2) -> float:
 		if p.x >= s.x0 and p.x <= s.x1 and s.y >= p.y and s.y < best:
 			best = s.y
 	return best
-
-
-func base_hush() -> float:
-	return 1.0 if hushed else 0.0
 
 
 func combat_active() -> bool:

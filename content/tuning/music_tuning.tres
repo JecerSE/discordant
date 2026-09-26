@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="MusicTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/tuning/music_tuning.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+min_combat_hush = 0.2
+hush_follow_speed = 0.8
+crossfade_time = 0.35
+crossfade_depth_db = -30.0

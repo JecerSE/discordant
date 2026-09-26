@@ -54,7 +54,7 @@ func _ready() -> void:
 
 	var song: Dictionary = Content.PAGES[page_id].song
 	if Synth.song.get("seed", "") != song.seed or not Synth.playing:
-		Synth.start_song(song)
+		Synth.transition_to(song)
 
 	_begin()
 
@@ -116,7 +116,7 @@ func _physics_process(delta: float) -> void:
 	hush_visual = move_toward(hush_visual, 1.0 if hushed else 0.0, delta * 0.7)
 	var silent_rune: bool = Game.has_run() and Game.flag("four_thirty_three") > 0.0 and player != null and player.still_t > 0.6
 	if not silent_rune:
-		Synth.hush = move_toward(Synth.hush, base_hush(), delta * 0.8)
+		Synth.hush = move_toward(Synth.hush, base_hush(), delta * MUSIC_TUNING.hush_follow_speed)
 
 	_update_features(delta)
 	for l in _line_fx:

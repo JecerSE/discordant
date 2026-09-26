@@ -60,6 +60,7 @@ func _spawn_point(id: String) -> Vector2:
 
 func _telegraph_spawn(id: String, p: Vector2, elite: bool) -> void:
 	pending_spawns += 1
+	hush_peak = maxi(hush_peak, alive_enemies().size() + pending_spawns)
 	var m := FX.SpawnMark.new()
 	m.kind = id
 	m.elite = elite
@@ -138,3 +139,14 @@ func _end_fermata() -> void:
 	shake(8.0)
 	for e in alive_enemies():
 		e.release_stored()
+
+
+## How muffled the music should be (issue #13): fully while enemies are arriving,
+## then easing off as the room empties, clear once it's cleared.
+func base_hush() -> float:
+	if not hushed:
+		return 0.0
+	var left: int = alive_enemies().size() + pending_spawns
+	if hush_peak <= 0 or state == "enter":
+		return 1.0
+	return clampf(float(left) / float(hush_peak), MUSIC_TUNING.min_combat_hush, 1.0)

@@ -9,6 +9,7 @@ extends Node
 ## Tacet is literally silence eating the song.
 
 const POOL := 28
+const MUSIC_TUNING: MusicTuning = preload("res://content/tuning/music_tuning.tres")
 
 var instruments := {}      # name -> {stream, base_midi}
 var sfx := {}              # name -> AudioStreamWAV
@@ -24,6 +25,8 @@ var _phrase: Array = []    # 4 bars * 16 steps of lead events: [] or [degree, ga
 var _bass_line: Array = []
 var playing := false
 var kazoo := false
+## Extra dB on the music bus, used for crossfades.
+var fade_db := 0.0
 ## 0 = clear song, 1 = fully hushed.
 var hush := 0.0:
 	set(v):
@@ -65,7 +68,7 @@ func _setup_buses() -> void:
 
 func apply_volumes() -> void:
 	var s: Dictionary = Game.settings
-	AudioServer.set_bus_volume_db(_music_bus, linear_to_db(maxf(0.0001, s.get("music", 0.7))))
+	AudioServer.set_bus_volume_db(_music_bus, linear_to_db(maxf(0.0001, s.get("music", 0.7))) + fade_db)
 	AudioServer.set_bus_volume_db(_sfx_bus, linear_to_db(maxf(0.0001, s.get("sfx", 0.8))))
 
 
@@ -108,6 +111,31 @@ func start_song(def: Dictionary) -> void:
 	_bass_line = _compose_bass()
 	playing = true
 	Beat.start(def.get("bpm", 100.0))
+
+
+## Moves to another song without a hard cut (issue #13): fade out, switch, fade in.
+## Does nothing if that song is already playing.
+func transition_to(def: Dictionary) -> void:
+	if playing and song.get("seed", "") == def.get("seed", ""):
+		return
+	if not playing:
+		start_song(def)
+		_fade_to(0.0)
+		return
+	var tw := create_tween()
+	tw.tween_method(_set_fade_db, fade_db, MUSIC_TUNING.crossfade_depth_db, MUSIC_TUNING.crossfade_time)
+	tw.tween_callback(start_song.bind(def))
+	tw.tween_method(_set_fade_db, MUSIC_TUNING.crossfade_depth_db, 0.0, MUSIC_TUNING.crossfade_time)
+
+
+func _fade_to(target_db: float) -> void:
+	var tw := create_tween()
+	tw.tween_method(_set_fade_db, fade_db, target_db, MUSIC_TUNING.crossfade_time)
+
+
+func _set_fade_db(v: float) -> void:
+	fade_db = v
+	apply_volumes()
 
 
 func stop_song() -> void:

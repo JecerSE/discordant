@@ -25,7 +25,7 @@ func _ready() -> void:
 	choices = MapGen.choices(Game.run.map, Game.run.node)
 	var song: Dictionary = Game.page().song
 	if Synth.song.get("seed", "") != song.seed or not Synth.playing:
-		Synth.start_song(song)
+		Synth.transition_to(song)
 	Synth.hush = 0.0
 	# Put the cursor on the middle choice.
 	sel = choices.size() / 2
