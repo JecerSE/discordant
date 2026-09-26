@@ -16,8 +16,8 @@ const SIGNS := {
 		"(If the stand keeps calling you late when you're on time, raise the beat offset in Pause → Settings.)",
 	],
 	"climb": [
-		"Three pillar pages, then the Grand Score at the top.",
-				"Each page is a map of rooms. You pick your path.",
+		"Three pillar bars, then the Grand Score at the top.",
+				"Each bar is a map of rooms. You pick your path.",
 		"Walk through the double bar on the right when you're ready.",
 	],
 }

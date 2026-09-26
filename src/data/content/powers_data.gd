@@ -44,7 +44,7 @@ const POWERS := {
 	"grace_note": {"name": "Grace Note", "family": "margin", "cd": 2.5, "dmg": 20,
 		"desc": "Teleport behind the nearest enemy and hit it."},
 	"accelerando": {"name": "Accelerando", "family": "margin", "cd": 16.0, "dmg": 0,
-		"desc": "The whole page plays at double tempo for 5 seconds. Enemies too."},
+		"desc": "The whole bar plays at double tempo for 5 seconds. Enemies too."},
 	"ghost_note": {"name": "Ghost Note", "family": "margin", "cd": 10.0, "dmg": 40,
 		"desc": "Leave a decoy of yourself. Enemies go after it. It explodes after 3 seconds."},
 }

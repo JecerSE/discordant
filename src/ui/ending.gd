@@ -68,7 +68,7 @@ func _draw() -> void:
 		UI.wrapped(self, Vector2(sz.x * 0.5 - 380, y), lines[i], 20, Color(Pal.INK_SOFT, la), 760, -1, HORIZONTAL_ALIGNMENT_CENTER)
 		y += 58.0
 	var secs := _secs
-	var page_names := ["the Margin", "Page I", "Page II", "Page III", "the Grand Score", "beyond"]
+	var page_names := ["the Margin", "Bar I", "Bar II", "Bar III", "the Grand Score", "beyond"]
 	var reached: String = page_names[clampi(int(summary.get("page_i", 0)) + 1, 0, page_names.size() - 1)]
 	if v == "coda":
 		reached = "the Score itself"

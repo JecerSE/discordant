@@ -30,7 +30,7 @@ No install needed. On Windows, SmartScreen may warn you because the exe isn't si
 ## What's in it
 
 - 4 characters: Quarter Note, Mundo (Whole Note), Half Note, Eighth Note
-- 3 pillar pages (Percussion, Wind, Strings), then the Grand Score
+- 3 pillar bars (Percussion, Wind, Strings), then the Grand Score
 - 20 powers, 40+ runes, 24 relics
 - 15 enemy types, 6 elites, 5 bosses
 - 2 endings and a secret boss

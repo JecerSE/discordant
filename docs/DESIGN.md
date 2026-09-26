@@ -13,8 +13,8 @@ team should decide those.
 | The Rest (corruption) | Enemies are rests. While a room is hushed, the Music bus is low-passed and the lead melody is muted, so the Rest is audible silence. Clearing the room brings the song back. |
 | Racism toward the pause notes | *Pause*, a half rest in the Margin, gives the intro: rests were struck out and blamed for the silence. Zephyrine (Wind) is openly prejudiced. The Luthier (String) remembers when Strings and Rests played together. The secret ending pays it off: the Rest was never the corruption. |
 | The Margin (start / tutorial) | Hub room. It holds signs (controls, rhythm, the climb), Pause, a practice stand that reports early/late in ms, and statues to pick your note. |
-| Percussion / Wind / String territories | Pages I–III. Each has its own song, enemy pool, champions, teacher, keeper and room layout: Percussion is low-ceilinged with drum pads, Wind is open sky with updrafts, String has harmonic nodes and humming strings. |
-| The Grand Score (final zone) | Page IV: a fermata/shop choice, then the Conductor. |
+| Percussion / Wind / String territories | Bars I–III. Each has its own song, enemy pool, champions, teacher, keeper and room layout: Percussion is low-ceilinged with drum pads, Wind is open sky with updrafts, String has harmonic nodes and humming strings. |
+| The Grand Score (final zone) | Bar IV: a fermata/shop choice, then the Conductor. |
 | The Conductor, unaware notes are alive | Boss in four movements: Allegro (percussion leaps + baton), Adagio (string columns, line strikes), Presto (wind bullets + gusts), and a Finale at 1.25× tempo that cycles all three. |
 | Secret boss: the sheet itself | Collect the three clefs the Scribble hides (one per pillar page, in a random combat room, in the highest corner, after the room is cleared). Beat the Conductor holding all three and the page tears: **The Score, Itself**. Its lines strike on the beat, notes rain from the margins, and a clef-eye drifts between lines. |
 | Endings | Death = *Tacet*. Conductor = *Prima volta* (first ending, drawn with a 1. volta bracket). The Score = *Coda* (the secret ending). |
