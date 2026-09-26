@@ -93,6 +93,13 @@ func _draw() -> void:
 	var line := "HP %d   ·   damage +%d%%   ·   speed +%d%%   ·   cooldowns -%d%%   ·   beat window ±%d ms" % [
 		int(s.max_hp), int(s.dmg * 100), int(s.speed * 100), int(s.cdr * 100), int(s.beat_window * 1000)]
 	UI.text(self, r.position + Vector2(30, 96), line, 14, Pal.INK_SOFT)
+	# Rhythm combos (issue #11): what to play, written as notes.
+	var combos: ComboSet = Player.COMBO_SETS.get(Game.run.char)
+	if combos:
+		var parts: Array[String] = []
+		for pattern in combos.patterns:
+			parts.append("%s  %s" % [pattern.pattern_name, pattern.notation])
+		UI.text(self, Vector2(r.end.x - 30, r.position.y + 44), "Combos:  " + "     ".join(parts), 14, Pal.GOLD, HORIZONTAL_ALIGNMENT_RIGHT)
 
 	# Rune slots.
 	var slots: Array = Game.run.rune_slots

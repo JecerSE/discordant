@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="ComboSet" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/data/combat/combo_set.gd" id="1"]
+[ext_resource type="Script" path="res://src/data/combat/combo_pattern.gd" id="2"]
+
+[sub_resource type="Resource" id="combo_1"]
+script = ExtResource("2")
+pattern_name = "Common Time"
+notation = "♩ ♩ ♩ ♩"
+intervals = PackedFloat32Array(1, 1, 1)
+finisher = &"common_time"
+damage = 34.0
+description = "Four quarters in a row: a wide crescent plus a soundwave."
+
+[sub_resource type="Resource" id="combo_2"]
+script = ExtResource("2")
+pattern_name = "Syncopated Run"
+notation = "♪ ♪ ♩"
+intervals = PackedFloat32Array(0.5, 0.5)
+finisher = &"syncopated_run"
+damage = 24.0
+description = "Two eighths then a quarter: dash through everything ahead."
+
+[resource]
+script = ExtResource("1")
+patterns = Array[ExtResource("2")]([SubResource("combo_1"), SubResource("combo_2")])

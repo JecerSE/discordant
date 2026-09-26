@@ -85,11 +85,13 @@ var stagger_t := 0.0
 # Momentum carry and launches (issue #15).
 var momentum_t := 0.0
 var launch_lock := 0.0
-# Timing grades (issues #12, #14).
+# Timing grades and rhythm combos (issues #11, #12, #14).
 var last_grade: BeatGrader.Grade = BeatGrader.Grade.NONE
 var pending_grade: BeatGrader.Grade = BeatGrader.Grade.NONE
 var pending_down := false
+var pending_combo := {}
 var mash_stacks := 0
+var combo_tracker: ComboTracker
 var jump_grade: BeatGrader.Grade = BeatGrader.Grade.NONE
 var flow_t := 0.0
 var dash_on_beat := false

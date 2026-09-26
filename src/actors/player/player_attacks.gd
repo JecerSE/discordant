@@ -1,7 +1,7 @@
 class_name PlayerAttacks
 extends PlayerDamage
 ## Layer 3 of 6. Timing grades, the four characters' attacks (data in
-## content/combat/), swings that follow the player, dash.
+## content/combat/), swings that follow the player, rhythm combos, dash.
 
 const ATTACK_SETS := {
 	"quarter": preload("res://content/combat/quarter_attacks.tres"),
@@ -9,12 +9,20 @@ const ATTACK_SETS := {
 	"whole": preload("res://content/combat/whole_attacks.tres"),
 	"eighth": preload("res://content/combat/eighth_attacks.tres"),
 }
+const COMBO_SETS := {
+	"quarter": preload("res://content/combat/quarter_combos.tres"),
+	"half": preload("res://content/combat/half_combos.tres"),
+	"whole": preload("res://content/combat/whole_combos.tres"),
+	"eighth": preload("res://content/combat/eighth_combos.tres"),
+}
 
 
 func attack_set() -> AttackSet:
 	return ATTACK_SETS[char_id]
 
 
+func combo_set() -> ComboSet:
+	return COMBO_SETS[char_id]
 
 
 ## Grades a press right now (issue #12). A primed parry and Tempo Marking's first
@@ -36,8 +44,9 @@ func _judge_beat() -> bool:
 	return BeatGrader.is_on_beat(last_grade)
 
 
-## Called the moment attack is pressed: grades it and updates the mashing penalty.
-## _attack() uses the grade even if it runs a few frames later from the input buffer.
+## Called the moment attack is pressed: grades it, updates the mashing penalty and
+## feeds the combo tracker. _attack() uses these results even if it runs a few
+## frames later from the input buffer.
 func _register_attack_press(down_held: bool) -> void:
 	pending_grade = _grade_now()
 	pending_down = down_held
@@ -45,6 +54,13 @@ func _register_attack_press(down_held: bool) -> void:
 		mash_stacks = mini(mash_stacks + 1, BeatGrader.TUNING.mash_penalty_max_stacks)
 	elif pending_grade >= BeatGrader.Grade.GOOD:
 		mash_stacks = 0
+	if combo_tracker == null:
+		combo_tracker = ComboTracker.new(combo_set())
+	# Combos are read on a half-beat grid so eighth-note rhythms count.
+	var combo_grade := pending_grade
+	if pending_grade != BeatGrader.Grade.PERFECT and Beat.running:
+		combo_grade = BeatGrader.grade(Beat.signed_offset(2), stats().beat_window)
+	pending_combo = combo_tracker.press(Beat.song_beats(), combo_grade)
 
 
 func _attack() -> void:
@@ -58,6 +74,11 @@ func _attack() -> void:
 	room.grade_feedback(global_position + Vector2(0, -size * 3.5), g)
 	if on_beat:
 		Synth.sfx_play("hit_beat", -10.0)
+	if not pending_combo.is_empty():
+		ComboFinishers.execute(self as Player, pending_combo.pattern, pending_combo.perfect)
+		pending_combo = {}
+		atk_cd = 0.3 / haste
+		return
 	if char_id == "whole" and not is_on_floor():
 		diving = "pound"
 		dive_dmg = 30.0

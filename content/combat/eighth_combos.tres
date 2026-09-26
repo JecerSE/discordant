@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="ComboSet" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/data/combat/combo_set.gd" id="1"]
+[ext_resource type="Script" path="res://src/data/combat/combo_pattern.gd" id="2"]
+
+[sub_resource type="Resource" id="combo_1"]
+script = ExtResource("2")
+pattern_name = "Eighth Run"
+notation = "♪ ♪ ♪ ♪ ♪"
+intervals = PackedFloat32Array(0.5, 0.5, 0.5, 0.5)
+finisher = &"eighth_run"
+damage = 9.0
+description = "Five eighths in a row: a flurry of six quick cuts."
+
+[sub_resource type="Resource" id="combo_2"]
+script = ExtResource("2")
+pattern_name = "Swing Cut"
+notation = "♪ ♩ ♪"
+intervals = PackedFloat32Array(0.5, 1)
+finisher = &"swing_cut"
+damage = 26.0
+description = "Eighth, quarter, eighth: blink behind the nearest enemy and cut."
+
+[resource]
+script = ExtResource("1")
+patterns = Array[ExtResource("2")]([SubResource("combo_1"), SubResource("combo_2")])

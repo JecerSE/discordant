@@ -35,6 +35,9 @@ map, so a continuous or vertical layout could replace `MapGen` without touching 
 
 ## Rhythm (the core)
 
+Attacks are graded perfect / great / good / miss by how close they land to the beat, and each grade has its own damage. Repeated misses stack a small penalty. Each character also knows two rhythm combos (for example Common Time: four quarters in a row) that end in a finisher; all-great-or-better makes it perfect. Jumping, dashing and landing on the beat give small bonuses. The Eighth Note is graded on half-beats.
+
+
 One global clock (`Beat`) drives the music, every enemy action and every boss pattern.
 - Striking **on the beat** deals ×1.5 (plus runes), shows a gold ♪, and feeds several runes.
 - Every enemy winds up on one beat (a red accent mark `>` appears) and strikes on the next.

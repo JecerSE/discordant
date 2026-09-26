@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="ComboSet" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/data/combat/combo_set.gd" id="1"]
+[ext_resource type="Script" path="res://src/data/combat/combo_pattern.gd" id="2"]
+
+[sub_resource type="Resource" id="combo_1"]
+script = ExtResource("2")
+pattern_name = "Cut Time"
+notation = "𝅗𝅥 𝅗𝅥 𝅗𝅥"
+intervals = PackedFloat32Array(2, 2)
+finisher = &"cut_time"
+damage = 40.0
+description = "Three halves: two rings, the second one beat after the first."
+
+[sub_resource type="Resource" id="combo_2"]
+script = ExtResource("2")
+pattern_name = "Dotted Rise"
+notation = "♩. ♪ ♩"
+intervals = PackedFloat32Array(1.5, 0.5)
+finisher = &"dotted_rise"
+damage = 30.0
+description = "Dotted quarter, eighth, quarter: a rising slash that launches enemies."
+
+[resource]
+script = ExtResource("1")
+patterns = Array[ExtResource("2")]([SubResource("combo_1"), SubResource("combo_2")])
