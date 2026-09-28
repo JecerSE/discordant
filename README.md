@@ -4,6 +4,8 @@ A quarter note fell off the Grand Score. Climb back up.
 
 A 2D rhythm platformer roguelite. Every room is a page of sheet music and the staff lines are the platforms. Hit on the beat to do more damage, clear the rests out of each room, and fight your way up to the Conductor.
 
+The final lore hasn't been written yet so you'll have to settle with this cringe story.
+
 ## Download
 
 Go to **[Releases](../../releases/latest)** and grab the file for your system:
@@ -13,7 +15,7 @@ Go to **[Releases](../../releases/latest)** and grab the file for your system:
 
 No install needed. On Windows, SmartScreen may warn you because the exe isn't signed. Click "More info" and then "Run anyway".
 
-## Controls
+## Controls / Can now Be customzied
 
 | Action | Keyboard | Controller |
 | --- | --- | --- |
@@ -28,15 +30,3 @@ No install needed. On Windows, SmartScreen may warn you because the exe isn't si
 | Pause | Esc | Start |
 
 Every control can be rebound in Pause → Controls (keyboard, mouse and controller).
-
-## What's in it
-
-- 4 characters: Quarter Note, Mundo (Whole Note), Half Note, Eighth Note
-- 3 pillar bars (Percussion, Wind, Strings), then the Grand Score
-- 20 powers, 40+ runes, 24 relics
-- 15 enemy types, 6 elites, 5 bosses
-- 2 endings and a secret boss
-
-## Running from source
-
-Open the folder in Godot 4.7 and press Play.
