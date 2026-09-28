@@ -36,7 +36,7 @@ var save_path := SAVE_PATH
 
 
 ## Registers all actions with their defaults, then the player's saved bindings.
-## Debug menu: take no damage (issue #21). Not saved.
+## Take no damage: F11, or the debug menu (issue #21). Not saved.
 var god_mode := false
 
 func _setup_input() -> void:

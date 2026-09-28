@@ -5,6 +5,9 @@ class_name DebugTools
 const ACTION := &"debug_menu"
 const KEY := KEY_F1
 const FLAG := "--debug-menu"
+## God mode has its own key in every build, release included.
+const GOD_ACTION := &"god_mode"
+const GOD_KEY := KEY_F11
 
 
 static func enabled() -> bool:
@@ -12,9 +15,15 @@ static func enabled() -> bool:
 
 
 static func install() -> void:
-	if not enabled() or InputMap.has_action(ACTION):
+	_add(GOD_ACTION, GOD_KEY)
+	if enabled():
+		_add(ACTION, KEY)
+
+
+static func _add(action: StringName, key: Key) -> void:
+	if InputMap.has_action(action):
 		return
-	InputMap.add_action(ACTION)
+	InputMap.add_action(action)
 	var k := InputEventKey.new()
-	k.physical_keycode = KEY
-	InputMap.action_add_event(ACTION, k)
+	k.physical_keycode = key
+	InputMap.action_add_event(action, k)

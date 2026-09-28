@@ -71,6 +71,16 @@ func _run() -> void:
 	_expect(game.run.clefs.size() == 3, "debug gives the three clefs")
 	_expect(room.alive_enemies().is_empty(), "debug kill clears enemies")
 
+	# God mode has F11 in every build, not only when the debug menu is enabled.
+	dbg.close()
+	await _frames(3)
+	_expect(_has_key(DebugTools.GOD_ACTION, DebugTools.GOD_KEY), "F11 is bound to god mode")
+	var god_before: bool = game.god_mode
+	Input.action_press(DebugTools.GOD_ACTION)
+	await _frames(2)
+	Input.action_release(DebugTools.GOD_ACTION)
+	_expect(game.god_mode != god_before, "F11 toggles god mode")
+
 	print("test_menus: ok" if _failures == 0 else "test_menus: %d failure(s)" % _failures)
 	quit(1 if _failures > 0 else 0)
 
