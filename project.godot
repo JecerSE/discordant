@@ -17,6 +17,7 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [autoload]
 
+Boot="*res://src/autoload/boot.gd"
 Beat="*res://src/autoload/beat.gd"
 Synth="*res://src/autoload/synth.gd"
 Game="*res://src/autoload/game.gd"
@@ -30,8 +31,23 @@ gdscript/warnings/narrowing_conversion=0
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
+window/size/window_width_override=1440
+window/size/window_height_override=810
 window/stretch/mode="canvas_items"
-window/stretch/aspect="keep_height"
+window/stretch/aspect="expand"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/build_stamp/plugin.cfg")
+
+[importer_defaults]
+
+texture={
+"compress/mode": 0,
+"detect_3d/compress_to": 0,
+"mipmaps/generate": false,
+"process/fix_alpha_border": false
+}
 
 [rendering]
 
@@ -39,3 +55,4 @@ renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 anti_aliasing/quality/msaa_2d=2
 environment/defaults/default_clear_color=Color(0.953, 0.925, 0.851, 1)
+2d/snap/snap_2d_transforms_to_pixel=true

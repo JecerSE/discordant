@@ -1,0 +1,189 @@
+{
+  "id": "shard_b",
+  "note": "Item isolation: each relic and champion item forced for 40 runs, plus 200 control runs; paired seeds.",
+  "runs": 1160,
+  "characters": [
+    "quarter",
+    "whole",
+    "half",
+    "eighth"
+  ],
+  "base_seed": 200000,
+  "clefs": false,
+  "item_policy": "random",
+  "paired_seeds": true,
+  "variants": [
+    {
+      "label": "control",
+      "runs": 200
+    },
+    {
+      "label": "rosin",
+      "force_items": [
+        "rosin"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "tuning_fork",
+      "force_items": [
+        "tuning_fork"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "brass_metronome",
+      "force_items": [
+        "brass_metronome"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "sheet_protector",
+      "force_items": [
+        "sheet_protector"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "ear_plugs",
+      "force_items": [
+        "ear_plugs"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "valve_oil",
+      "force_items": [
+        "valve_oil"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "capo",
+      "force_items": [
+        "capo"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "page_turner",
+      "force_items": [
+        "page_turner"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "practice_mute",
+      "force_items": [
+        "practice_mute"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "encore_ticket",
+      "force_items": [
+        "encore_ticket"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "gold_leaf",
+      "force_items": [
+        "gold_leaf"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "espresso",
+      "force_items": [
+        "espresso"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "sustain_pedal",
+      "force_items": [
+        "sustain_pedal"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "tempo_marking",
+      "force_items": [
+        "tempo_marking"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "bent_paperclip",
+      "force_items": [
+        "bent_paperclip"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "pencil_stub",
+      "force_items": [
+        "pencil_stub"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "double_stop",
+      "force_items": [
+        "double_stop"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "rubber_mallet",
+      "force_items": [
+        "rubber_mallet"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "timpanist_mallet",
+      "force_items": [
+        "timpanist_mallet"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "cymbal_shard",
+      "force_items": [
+        "cymbal_shard"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "piper_reed",
+      "force_items": [
+        "piper_reed"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "horn_bell",
+      "force_items": [
+        "horn_bell"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "violist_bow",
+      "force_items": [
+        "violist_bow"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "cello_endpin",
+      "force_items": [
+        "cello_endpin"
+      ],
+      "runs": 40
+    }
+  ]
+}

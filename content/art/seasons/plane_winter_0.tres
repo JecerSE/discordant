@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ParallaxPlane" format=3]
+
+[ext_resource type="Script" path="res://src/art/parallax_plane.gd" id="1_c5bb6"]
+
+[resource]
+script = ExtResource("1_c5bb6")
+sprite_key = "season_winter_plane_0"
+depth = 0.12
+height = 312.0
+palette_index = 2
+alpha = 0.05
+swell_a = 50.0
+swell_b = 20.0
+cycles_b = 2
+peaks = 60.0
+peak_cycles = 3

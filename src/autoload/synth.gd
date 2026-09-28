@@ -99,7 +99,7 @@ func note(inst: String, midi: int, volume_db := 0.0, music := true) -> void:
 
 
 func sfx_play(sname: String, volume_db := 0.0, pitch_jitter := 0.0) -> void:
-	var st := randf_range(-pitch_jitter, pitch_jitter) if pitch_jitter > 0.0 else 0.0
+	var st := Game.stream("cosmetic").randf_range(-pitch_jitter, pitch_jitter) if pitch_jitter > 0.0 else 0.0
 	play(sname, st, volume_db, false)
 
 

@@ -7,7 +7,11 @@ extends GameRun
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	if OS.get_cmdline_args().has("--script") or OS.get_cmdline_args().has("-s"):
+	# Tools and harnesses never touch the real save: that covers `--script` and a harness
+	# made the main loop through override.cfg (an exported build under test), whose command
+	# line has no --script.
+	if OS.get_cmdline_args().has("--script") or OS.get_cmdline_args().has("-s") \
+			or Engine.get_main_loop().get_script() != null:
 		save_path = TEST_SAVE_PATH
 	load_save()
 	_setup_input()
@@ -63,7 +67,7 @@ func dissonances() -> Array:
 func stats() -> Dictionary:
 	if not _stats_dirty and not _stats_cache.is_empty():
 		return _stats_cache
-	var c := Content.character(run.get("char", "quarter"))
+	var c := Content.character(run.get("char", ContentIds.CharacterIds.QUARTER))
 	var s := {
 		"max_hp": float(c.hp), "speed": 0.0, "dmg": 0.0, "atk_speed": 0.0, "cdr": 0.0,
 		"dr": float(c.dr), "beat_window": 0.085, "jumps": float(c.jumps), "dash_cdr": 0.0,
@@ -82,7 +86,7 @@ func stats() -> Dictionary:
 				sources.append(Content.FAMILY_SETS[fam][tier])
 	for dis in dissonances():
 		sources.append(Content.DISSONANCE[dis])
-	if run.get("char", "") == "whole":
+	if run.get("char", "") == ContentIds.CharacterIds.WHOLE:
 		sources.append({"mods": {"dmg": 0.08 * fc.percussion}})
 	for d in sources:
 		var mods: Dictionary = d.get("mods", {})
@@ -91,7 +95,7 @@ func stats() -> Dictionary:
 		var fl: Dictionary = d.get("flags", {})
 		for k in fl:
 			flags[k] = flags.get(k, 0.0) + float(fl[k])
-	if run.get("char", "") == "quarter":
+	if run.get("char", "") == ContentIds.CharacterIds.QUARTER:
 		s.beat_window *= 1.3
 	s.beat_window = maxf(0.03, s.beat_window)
 	s.flags = flags

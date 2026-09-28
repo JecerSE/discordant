@@ -66,7 +66,7 @@ func ai_beat(n: int) -> void:
 							var a := -0.5 + i * 0.25
 							_shoot_dir((tp - global_position).normalized().rotated(a), 300.0, "gust", dmg * 0.8, Pal.WIND)
 						Synth.sfx_play("roar", -8.0, 6.0)
-						room.shake(4.0)
+						fx.shake(4.0)
 				6:
 					state = "windup"
 					facing = signf(dx) if absf(dx) > 2.0 else facing
@@ -80,7 +80,7 @@ func ai_beat(n: int) -> void:
 				_tether_tick += 1
 				var p = room.player
 				if p:
-					p.take_hit(dmg, global_position)
+					p.take_hit(dmg, global_position, {"source": id})
 				if _tether_tick >= 2:
 					_end_tether()
 			elif n % 8 == 3:
@@ -101,4 +101,4 @@ func ai_beat(n: int) -> void:
 						state = ""
 						_enemy_shockwaves(dmg)
 						Synth.sfx_play("boom", -6.0)
-						room.shake(5.0)
+						fx.shake(5.0)

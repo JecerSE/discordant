@@ -4,6 +4,7 @@ extends Control
 ## every frame from what it reads. A widget never changes game state.
 
 var room: Node
+var enemy_roster: EnemyRoster
 
 
 func _ready() -> void:

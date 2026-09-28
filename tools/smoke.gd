@@ -1,8 +1,14 @@
 # tools/smoke.gd
 extends SceneTree
-## godot --headless --path . --script tools/smoke.gd [-- quick]
+## godot --headless --fixed-fps 60 --path . --script tools/smoke.gd [-- quick]
 ## Loads every script, then drives every room type on every page, every boss, every power,
 ## rune and relic with a scripted bot. Errors land in stderr; the summary says what ran.
+## Deterministic: the global RNG is seeded with SMOKE_SEED before anything runs (new_run()
+## takes its run seed from it), and --fixed-fps 60 is required so frames step at a fixed
+## rate. Two runs of the same code give identical logs and the same frame count, so the
+## frame count can be compared between branches.
+
+const SMOKE_SEED := 20260927
 
 var main: Node
 var frames := 0
@@ -14,6 +20,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	seed(SMOKE_SEED)
 	await process_frame
 	var ok := _load_all("res://src")
 	print("[smoke] scripts loaded: ", ok)
@@ -45,7 +52,7 @@ func _run() -> void:
 				await _frames(5)
 				await _bot(420 if ty in ["combat", "elite", "boss"] else 120)
 				var room = main.current
-				print("[smoke] %s page %d %s — enemies %d, state %s, hp %d" % [ch, page_i, ty, room.alive_enemies().size() if room.has_method("alive_enemies") else -1, room.get("state"), int(game.run.hp)])
+				print("[smoke] %s page %d %s — enemies %d, state %s, hp %d" % [ch, page_i, ty, room.alive_enemies().size() if room.has_method("alive_enemies") else -1, room.get("state"), int(game.run.get("hp", 0))])
 		if ch == "quarter":
 			# The secret boss.
 			game.run["grand"] = true
@@ -62,15 +69,6 @@ func _run() -> void:
 	await _frames(30)
 	game.goto("title")
 	await _frames(30)
-	# The prologue plays through on its own and hands over to the title.
-	game.goto("intro")
-	# Screen changes are deferred; let the intro actually replace the title first.
-	await _frames(3)
-	var waited := 0
-	while waited < 60 * 60 and not (main.current is Control and main.current.get_script() == load("res://src/ui/title.gd")):
-		await _frames(1)
-		waited += 1
-	print("[smoke] intro reached the title after %d frames" % waited)
 	print("[smoke] done, frames ", frames)
 	quit()
 

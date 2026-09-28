@@ -4,6 +4,7 @@ extends Node2D
 ## keeps it deterministic and cheap: a room never holds more than a few dozen of these.
 
 var room: Node
+var enemy_roster: EnemyRoster
 var team := "enemy"          # "enemy" hurts the player, "player" hurts enemies
 var vel := Vector2.ZERO
 var radius := 9.0
@@ -19,6 +20,7 @@ var home: Node2D
 var homing := 0.0
 var bounces := 0             # bounce off floor, walls and ceiling this many times
 var mark := false            # a Motif Rest's wave: marks the player
+var source_id := ""          # the enemy id that fired this, for damage-taken attribution
 var t := 0.0
 var _hit := {}
 var _returning := false
@@ -67,11 +69,11 @@ func _physics_process(delta: float) -> void:
 		if p and p.is_hittable() and global_position.distance_to(p.global_position) < radius + 14.0:
 			if p.try_reflect(self):
 				return
-			if p.take_hit(dmg, global_position) and mark:
+			if p.take_hit(dmg, global_position, {"source": source_id}) and mark:
 				p.add_mark()
 			queue_free()
 	elif team == "player":
-		for e in room.alive_enemies():
+		for e in enemy_roster.alive_enemies():
 			var id: int = e.get_instance_id()
 			if _hit.has(id):
 				continue

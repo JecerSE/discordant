@@ -7,6 +7,11 @@ const GRAV := 2000.0
 const TUNING: EnemyTuning = preload("res://content/tuning/enemy_tuning.tres")
 
 var room: Node
+var enemy_roster: EnemyRoster
+var reward_flow: RewardFlow
+var arena: Arena
+var fx: RoomFx
+var fight: FightState
 var id := ""
 var def := {}
 var ename := ""
@@ -54,8 +59,6 @@ var patrol: EnemyPatrol
 var turn_cd := 0.0
 # Super armor for elites and bosses (issue #3).
 var stun_immune_t := 0.0
-## Draws the body as a pixel sprite (created in _ready).
-var animator: EnemyAnimator
 
 
 func setup(enemy_id: String, hp_scale := 1.0, dmg_scale := 1.0) -> void:
@@ -72,12 +75,13 @@ func setup(enemy_id: String, hp_scale := 1.0, dmg_scale := 1.0) -> void:
 	elite = def.get("elite", false)
 	family = def.get("family", "")
 	flying = ai in ["flyer", "shooter", "gust", "echo", "elite_piper", "elite_violist", "dasher", "phantom", "motif"]
-	beat_offset = randi() % 4
+	beat_offset = Game.stream("combat").randi() % 4
 
 
 func target_pos() -> Vector2:
-	if room.decoy and is_instance_valid(room.decoy):
-		return room.decoy.global_position
+	var d := fight.decoy()
+	if d and is_instance_valid(d):
+		return d.global_position
 	var p = room.player
 	if p and p.is_targetable() and aggro:
 		return p.global_position
@@ -86,7 +90,8 @@ func target_pos() -> Vector2:
 
 func has_target() -> bool:
 	var p = room.player
-	return (room.decoy and is_instance_valid(room.decoy)) or (p and p.is_targetable() and aggro)
+	var d := fight.decoy()
+	return (d and is_instance_valid(d)) or (p and p.is_targetable() and aggro)
 
 
 ## States in which an elite or boss has committed to an attack.
@@ -102,7 +107,7 @@ func has_super_armor() -> bool:
 ## Notice the player inside aggro range, lose them past leash range. Elites and
 ## bosses always know where the player is.
 func update_aggro() -> void:
-	if elite or boss or _last_stragglers():
+	if elite or boss:
 		aggro = true
 		return
 	var p = room.player
@@ -114,11 +119,6 @@ func update_aggro() -> void:
 		aggro = true
 	elif dist > TUNING.leash_range:
 		aggro = false
-
-
-func _last_stragglers() -> bool:
-	return room.type in ["combat", "elite"] and room.wave_i + 1 >= room.waves.size() and room.pending_spawns <= 0 \
-		and room.alive_enemies().size() <= TUNING.hunt_when_remaining
 
 
 func grounded() -> bool:

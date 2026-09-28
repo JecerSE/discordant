@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ParallaxPlane" format=3]
+
+[ext_resource type="Script" path="res://src/art/parallax_plane.gd" id="1_altxx"]
+
+[resource]
+script = ExtResource("1_altxx")
+sprite_key = "season_summer_plane_2"
+depth = 0.55
+height = 90.0
+alpha = 0.07
+swell_a = 26.0
+cycles_a = 3
+swell_b = 6.0
+cycles_b = 6

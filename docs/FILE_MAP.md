@@ -94,24 +94,3 @@ Every tuning number for these lives in a `.tres` file under `content/`, edited i
 | `src/debug/` | God mode and testing shortcuts (F1 in debug builds, or `-- --debug-menu`) | #21 |
 | `tools/test_generation.gd`, `test_combat.gd`, `test_menus.gd` | Headless rule tests | |
 | `tools/gen_combat_tres.py` | Writes the combat `.tres` files from tables | |
-
-## Added for the pixel art, environments, room shapes and prologue (2026-09-26)
-
-| File | What it is |
-| --- | --- |
-| `tools/art/*.py` | The seeded pixel-art generator: `pixel.py` (canvas), `palette.py`, `notes.py`, `rests.py`, `elites.py`, `bosses.py`, `npcs.py`, `props.py`, `env.py` (parallax layers, ground, planks), `logo.py`, `build.py` (writes everything) |
-| `assets/sprites/`, `assets/env/`, `assets/ui/` | Generated PNGs |
-| `content/art/*.tres` | One `SpriteSheet` per character, Rest, boss, teacher and prop |
-| `src/art/sprite_sheet.gd`, `pixel_sprite.gd`, `art_library.gd` | Sheets as resources, a node that plays them, loading and drawing by name |
-| `src/actors/player/player_animator.gd`, `src/actors/enemies/enemy_animator.gd` | Pick the animation from state; tints, squash, afterimages |
-| `src/world/environment_backdrop.gd` | Sky, far and near layers (Parallax2D), tinted by the hush |
-| `src/world/background.gd`, `feature_art.gd` | Staff per system, plank platforms, ground tiles, exit door; drum pads, updrafts, harmonics, strings |
-| `src/world/generation/room_shape.gd` | The four fight-room shapes and how many levels each has |
-| `src/world/generation/shape_builder.gd` | Width, ledger ledges, entry and exit landings, spawn and exit placement |
-| `src/world/generation/staff_inker.gd` | Staff lines into platforms, for every stacked staff |
-| `src/world/room/platform_ink.gd` | Platforms drawing themselves in from the spawn |
-| `src/data/tuning/environment_tuning.gd`, `cinematic_tuning.gd` | Tuning for the scenery, the title and the cutscene |
-| `src/data/content/intro_data.gd` | The prologue's shots: timing, captions, music, cues |
-| `src/cinematic/intro_cutscene.gd`, `intro_shots.gd`, `intro_shots_below.gd` | The prologue player and how each shot is drawn |
-| `src/ui/title_art.gd` | Logo, subtitle and falling note, shared by the title and the intro |
-| `tools/test_art.gd` | Every sheet exists and every animation's frames are in range |

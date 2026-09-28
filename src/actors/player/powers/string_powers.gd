@@ -4,35 +4,36 @@ class_name StringPowers
 
 
 static func cast(p: Player, id: String, dmg: float, lvl: int, info: Dictionary) -> bool:
-	var room = p.room
+	var fx: RoomFx = p.fx
+	var enemy_roster: EnemyRoster = p.enemy_roster
 	match id:
 		"soundwave":
-			Powers.fire_wave(p, dmg, 1.0, true, info.on_beat)
+			Powers.fire_wave(p, dmg, 1.0, true, info.on_beat, id)
 		"echo":
 			p.echo_t = 4.0 * Powers.dotted()
 			Synth.sfx_play("ping", -6.0, -2.0)
 		"soul_pull":
 			var best = null
 			var bd := 470.0
-			for e in room.alive_enemies():
+			for e in enemy_roster.alive_enemies():
 				var d: Vector2 = e.global_position - p.global_position
 				if signf(d.x) == p.facing or absf(d.x) < 20.0:
 					if d.length() < bd:
 						bd = d.length()
 						best = e
 			if best == null:
-				best = room.nearest_enemy(p.global_position, 300.0)
+				best = enemy_roster.nearest_enemy(p.global_position, 300.0)
 			if best == null:
 				Synth.sfx_play("error", -16.0)
 				return false
-			room.add_line_fx(p.global_position, best.global_position, Pal.STRING)
+			fx.add_line_fx(p.global_position, best.global_position, Pal.STRING)
 			best.pull_to(p.global_position + Vector2(p.facing * 46.0, -6.0))
 			best.apply_stun(1.3)
 			p.deal(best, dmg, info)
 			Synth.sfx_play("zap", -6.0, -4.0)
 		"tether":
 			var n := 0
-			for e in room.enemies_in_circle(p.global_position, 420.0):
+			for e in enemy_roster.enemies_in_circle(p.global_position, 420.0):
 				if n >= 4:
 					break
 				e.tether_t = 6.0

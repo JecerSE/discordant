@@ -46,11 +46,11 @@ static func _chest(room: Room, it: Interactable) -> void:
 		return
 	it.used = true
 	Synth.sfx_play("chime", -6.0)
-	var ids: Array = Loot.relics(2, room.rng)
-	if room.rng.randf() < 0.15:
-		ids.append_array(Loot.margins(1, room.rng))
+	var ids: Array = Loot.relics(2, Game.stream("loot"))
+	if Game.stream("loot").randf() < 0.15:
+		ids.append_array(Loot.margins(1, Game.stream("loot")))
 	else:
-		ids.append_array(Loot.runes(1, room.rng, room.family))
+		ids.append_array(Loot.runes(1, Game.stream("loot"), room.family))
 	room.offer("Treasure", "pick one", ids, func(id):
 		if id != "":
 			Game.grant(id)
@@ -108,7 +108,7 @@ static func teaching_passed(room: Room) -> void:
 
 
 static func _teach(room: Room, it: Interactable, t: Dictionary) -> void:
-	var ids := Loot.powers(3, room.rng, t.family)
+	var ids := Loot.powers(3, Game.stream("loot"), t.family)
 	room.offer("Learn a power", "taught by %s" % t.name, ids, func(id):
 		if id == "":
 			return
@@ -184,7 +184,7 @@ static func _statue(room: Room, it: Interactable) -> void:
 	Game.meta.last_char = id
 	Game.save()
 	Game.preview_run(id)
-	room.respawn_player()
+	room.reward_flow.respawn_player()
 	room.show_character_card(id)
 
 
@@ -203,8 +203,8 @@ static func _scribble(room: Room, it: Interactable) -> void:
 			Game.run.clefs.append(fam)
 			room.announce(clef, "%d of 3 clefs" % Game.run.clefs.size(), Pal.MARGIN)
 			Synth.sfx_play("chime", -2.0)
-		var ids: Array = Loot.margin_powers(2, room.rng)
-		ids.append_array(Loot.margins(1, room.rng))
+		var ids: Array = Loot.margin_powers(2, Game.stream("loot"))
+		ids.append_array(Loot.margins(1, Game.stream("loot")))
 		room.offer("Margin notes", "Rest powers and margin runes", ids, func(id):
 			if id == "":
 				return

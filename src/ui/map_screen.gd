@@ -40,8 +40,6 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_t += delta
 	queue_redraw()
-	if not Game.has_run():
-		return
 	if _has_overlay():
 		return
 	if _grace > 0.0:
@@ -94,9 +92,6 @@ func _enter(idx: int) -> void:
 
 
 func _draw() -> void:
-	# The run can end (or be only a hub preview) in the frame before the screen swaps.
-	if not Game.has_run():
-		return
 	var sz := size
 	draw_rect(Rect2(Vector2.ZERO, sz), Pal.PAPER)
 	var page := Game.page()

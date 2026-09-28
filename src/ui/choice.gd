@@ -67,7 +67,7 @@ func _draw() -> void:
 	_rects.clear()
 	for i in n:
 		var id: String = ids[i]
-		var fam := Content.item_family(id) if id != "heal" else "ledger"
+		var fam := Content.item_family(id) if id != "heal" else ContentIds.PageIds.LEDGER
 		var col := Pal.family_color(fam)
 		var lift := -10.0 if i == sel else 0.0
 		var r := Rect2(x0 + i * (cw + gap), 200 + lift, cw, ch)

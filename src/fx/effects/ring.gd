@@ -5,6 +5,7 @@ var radius := 100.0
 var dmg := 10.0
 var team := "player"
 var info := {}
+var source_id := ""          # the enemy id that placed this, for damage-taken attribution
 var color := Pal.INK
 var stun := 0.0
 var knock := 300.0
@@ -18,7 +19,7 @@ func tick(_delta: float) -> void:
 		return
 	_done = true
 	if team == "player":
-		for e in room.enemies_in_circle(global_position, radius):
+		for e in enemy_roster.enemies_in_circle(global_position, radius):
 			var i := info.duplicate()
 			i["aoe"] = true
 			i["knock"] = (e.global_position - global_position).normalized() * knock
@@ -28,7 +29,7 @@ func tick(_delta: float) -> void:
 	elif team == "enemy":
 		var p = room.player
 		if p and p.global_position.distance_to(global_position) < radius + 12.0:
-			p.take_hit(dmg, global_position)
+			p.take_hit(dmg, global_position, {"source": source_id})
 
 func _draw() -> void:
 	var k := t / life

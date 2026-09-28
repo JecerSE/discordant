@@ -47,34 +47,6 @@ extends Resource
 ## Placement attempts per feature before giving up.
 @export var feature_tries: int = 24
 
-@export_group("Room shapes")
-## Relative chance of each fight-room shape: corridor, climb, arena, descent.
-@export var shape_weights: PackedFloat32Array = PackedFloat32Array([0.35, 0.3, 0.2, 0.15])
-## Stacked staves in a climb or descent room (each adds 7 levels: 5 lines and 2 ledger lines).
-@export var tall_systems_min: int = 2
-@export var tall_systems_max: int = 3
-## Width of a climb room (px); tall rooms stay narrow so the climb is the point.
-@export var climb_width_min: float = 1280.0
-@export var climb_width_extra: float = 360.0
-## Width of an arena room (px).
-@export var arena_width: float = 1280.0
-## Short ledger-line ledges between staves (px).
-@export var ledger_length_min: float = 110.0
-@export var ledger_length_max: float = 190.0
-@export var ledgers_per_level: int = 3
-## Chance a ledger level gets each ledge.
-@export var ledger_chance: float = 0.75
-
-@export_group("Pop-in")
-## Platforms ink themselves in, spreading out from the spawn: the farthest one starts
-## this long (s) after the nearest, so every room is drawn before the first wave lands...
-@export var pop_spread_time: float = 0.6
-## ...after this delay (s), each taking this long to draw (s).
-@export var pop_delay: float = 0.1
-@export var pop_duration: float = 0.25
-## The exit door grows in over this long (s) when it opens.
-@export var exit_pop_duration: float = 0.45
-
 @export_group("Waves (issue #25)")
 ## Fewest waves in a fight room.
 @export var waves_min: int = 2
@@ -100,9 +72,6 @@ extends Resource
 @export var spawn_spacing: float = 170.0
 ## ...and at least this far from the player (px).
 @export var spawn_player_distance: float = 320.0
-## In a room taller than one screen, enemies appear within this many px above or below
-## the player, so a wave arrives on the staff you're on, not two screens away.
-@export var spawn_vertical_band: float = 420.0
 
 @export_group("Map (issue #8)")
 ## Rooms per branching layer between the entry fight and the fermata.

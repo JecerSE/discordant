@@ -4,13 +4,14 @@ class_name PercussionPowers
 
 
 static func cast(p: Player, id: String, dmg: float, lvl: int, info: Dictionary) -> bool:
-	var room = p.room
+	var arena: Arena = p.arena
+	var fx: RoomFx = p.fx
 	match id:
 		"shockwave":
 			if p.is_on_floor():
-				Powers.spawn_shockwaves(p, dmg, info.on_beat)
+				Powers.spawn_shockwaves(p, dmg, info.on_beat, id)
 				Synth.sfx_play("boom", -4.0)
-				p.room.shake(6.0)
+				fx.shake(6.0)
 			else:
 				p.diving = "shock"
 				p.dive_dmg = dmg
@@ -23,16 +24,16 @@ static func cast(p: Player, id: String, dmg: float, lvl: int, info: Dictionary) 
 			p.drumroll_dmg = dmg
 		"earthbend":
 			var x: float = p.global_position.x + p.facing * 120.0
-			x = clampf(x, 60.0, room.width - 60.0)
-			var y: float = room.ground_below(Vector2(x, p.global_position.y - 20.0))
+			x = clampf(x, 60.0, arena.width - 60.0)
+			var y: float = arena.ground_below(Vector2(x, p.global_position.y - 20.0))
 			var pl := FX.Pillar.new()
-			pl.room = room
+			pl.room = p.room
 			pl.dmg = dmg
 			pl.info = info.merged({"aoe": true})
 			pl.position = Vector2(x, y)
-			room.add_fx(pl)
+			fx.add_fx(pl)
 			Synth.sfx_play("tom", -2.0)
-			room.shake(5.0)
+			fx.shake(5.0)
 		_:
 			push_error("PercussionPowers: unknown power %s" % id)
 			return false

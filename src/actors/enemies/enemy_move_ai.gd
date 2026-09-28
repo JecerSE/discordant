@@ -40,7 +40,7 @@ func ai_process(d: float) -> void:
 					if ai == "elite_cymbalist":
 						_enemy_ring(150.0, dmg, Pal.PERCUSSION)
 						Synth.sfx_play("crash", -4.0)
-						room.shake(6.0)
+						fx.shake(6.0)
 					elif hit_wall:
 						stun = 0.7
 			else:
@@ -138,7 +138,7 @@ func _dropper(d: float, tp: Vector2) -> void:
 				st = 1.4
 				_enemy_ring(80.0, dmg, Pal.INK)
 				Synth.sfx_play("kick", -4.0)
-				room.shake(5.0)
+				fx.shake(5.0)
 		"rest":
 			velocity.x = 0.0
 			st -= d
@@ -171,7 +171,7 @@ func _flyer(d: float, tp: Vector2) -> void:
 func on_land() -> void:
 	match ai:
 		"jumper":
-			if room.combat_active():
+			if fight.combat_active():
 				_enemy_shockwaves(dmg * 0.8, 380.0, 0.45, 22.0)
 				Synth.sfx_play("snare", -10.0)
 		"walker":
@@ -183,7 +183,7 @@ func on_land() -> void:
 				_enemy_shockwaves(dmg)
 				_enemy_ring(110.0, dmg, Pal.PERCUSSION)
 				Synth.sfx_play("boom", -2.0)
-				room.shake(8.0)
+				fx.shake(8.0)
 		"dropper":
 			pass
 
@@ -191,13 +191,13 @@ func on_land() -> void:
 ## Idle wandering for ground enemies (issue #2): walk to the patrol point, pause,
 ## pick another. Turning at walls and ledges has a cooldown so it can't jitter.
 func _patrol_walk(d: float, chase: float) -> void:
-	var px := patrol.update(global_position.x, d, room.width)
+	var px := patrol.update(global_position.x, d, arena.width)
 	if patrol.is_pausing():
 		velocity.x = move_toward(velocity.x, 0.0, 900.0 * d)
 		return
 	var blocked := is_on_wall() or (is_on_floor() and not _ground_ahead())
 	if blocked and turn_cd <= 0.0:
-		patrol.blocked(global_position.x, room.width)
+		patrol.blocked(global_position.x, arena.width)
 		turn_cd = TUNING.turn_cooldown
 		px = patrol.target_x
 	var pdx := px - global_position.x

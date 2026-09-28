@@ -10,14 +10,15 @@ const TUNING: LevelGenTuning = preload("res://content/tuning/level_gen_tuning.tr
 static func build(room: Room) -> void:
 	var rng := room.rng
 	var fam := room.family
-	room.shape = RoomShape.pick(room.type, rng)
-	RoomShape.configure_levels(room, RoomShape.systems_for(room.shape, rng))
 	match room.type:
-		"combat", "elite":
-			room.width = ShapeBuilder.width_for(room, rng)
-			StaffInker.ink(room, rng, StaffInker.densities(fam))
-			var n := 2 + rng.randi() % 2 if room.type == "combat" else 2
-			_features(room, rng, fam, n)
+		"combat":
+			room.width = TUNING.combat_width_min + rng.randf_range(0, TUNING.combat_width_extra) + (TUNING.wind_width_bonus if fam == "wind" else 0.0)
+			_staff(room, rng, _densities(fam))
+			_features(room, rng, fam, 2 + rng.randi() % 2)
+		"elite":
+			room.width = TUNING.elite_width
+			_staff(room, rng, _densities(fam))
+			_features(room, rng, fam, 2)
 		"boss":
 			room.width = 1280.0
 			_boss_arena(room)
@@ -29,7 +30,27 @@ static func build(room: Room) -> void:
 			room.width = 1280.0
 			for s in [[0, 160, 380], [1, 240, 330], [0, 900, 1100]]:
 				room.segments.append({"y": room.line_ys[s[0]], "x0": float(s[1]), "x1": float(s[2])})
-	ShapeBuilder.place_entrances(room, rng)
+
+
+## Chance each line gets ink, bottom line first.
+static func _densities(fam: String) -> Array:
+	match fam:
+		"percussion": return [0.8, 0.65, 0.45, 0.25, 0.1]   # low ceilings, grounded
+		"wind": return [0.55, 0.7, 0.75, 0.7, 0.55]         # open sky
+		"string": return [0.7, 0.6, 0.6, 0.5, 0.3]
+	return [0.7, 0.6, 0.5, 0.4, 0.2]
+
+
+static func _staff(room: Room, rng: RandomNumberGenerator, dens: Array) -> void:
+	for li in 5:
+		var x := TUNING.start_margin + rng.randf_range(0, 200)
+		while x < room.width - TUNING.start_margin - 40.0:
+			var length := rng.randf_range(TUNING.segment_length_min, TUNING.segment_length_max)
+			var gap := rng.randf_range(TUNING.gap_min, TUNING.gap_max) + li * TUNING.gap_per_line
+			if rng.randf() < dens[li]:
+				room.segments.append({"y": room.line_ys[li], "x0": x, "x1": minf(x + length, room.width - TUNING.end_margin)})
+			x += length + gap
+	PlatformReachability.ensure_reachable(room.segments, room.line_ys, room.width)
 
 
 static func _features(room: Room, rng: RandomNumberGenerator, fam: String, n: int) -> void:
@@ -40,9 +61,9 @@ static func _features(room: Room, rng: RandomNumberGenerator, fam: String, n: in
 			"wind":
 				room.features.append({"kind": "updraft", "pos": Vector2(x, room.floor_y), "w": 90.0})
 			"string":
-				var li := rng.randi_range(1, room.line_ys.size() - 2)
+				var li := rng.randi_range(1, 3)
 				room.features.append({"kind": "harmonic", "pos": Vector2(x, room.line_ys[li] - 60.0), "cd": 0.0})
-				room.features.append({"kind": "string", "pos": Vector2(x + 140.0, 0), "top": room.line_ys.back() - 60.0, "vib": 2.0})
+				room.features.append({"kind": "string", "pos": Vector2(x + 140.0, 0), "top": room.line_ys[4] - 60.0, "vib": 2.0})
 
 
 static func _boss_arena(room: Room) -> void:

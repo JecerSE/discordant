@@ -20,21 +20,20 @@ func _ready() -> void:
 	shape.shape = c
 	add_child(shape)
 	home = global_position
-	patrol = EnemyPatrol.new(get_instance_id(), home.x)
+	# get_instance_id() used to seed this (issue: not reproducible across separate processes -
+	# it's an engine allocation counter, not derived from the run seed at all).
+	patrol = EnemyPatrol.new(Game.stream("combat").randi(), home.x)
 	facing = -1.0 if room.player and room.player.global_position.x < global_position.x else 1.0
 	Beat.beat.connect(_on_beat)
-	animator = EnemyAnimator.new()
-	animator.enemy = self
-	add_child(animator)
 
 
 func _physics_process(delta: float) -> void:
 	if dead:
 		return
-	if room.frozen:
+	if fight.frozen():
 		queue_redraw()
 		return
-	var d: float = delta * room.enemy_speed_scale * (1.35 if buff_t > 0.0 else 1.0)
+	var d: float = delta * fight.enemy_speed_scale() * (1.35 if buff_t > 0.0 else 1.0)
 	buff_t -= delta
 	t += d
 	hit_flash -= delta
@@ -60,12 +59,12 @@ func _physics_process(delta: float) -> void:
 		velocity.y = minf(velocity.y + GRAV * d, 1100.0)
 	elif knock_t > 0.0 or stun > 0.0:
 		velocity *= 0.92
-	var ts: float = room.enemy_speed_scale * (1.35 if buff_t > 0.0 else 1.0)
+	var ts: float = fight.enemy_speed_scale() * (1.35 if buff_t > 0.0 else 1.0)
 	velocity *= ts
 	move_and_slide()
 	velocity /= ts
-	global_position.x = clampf(global_position.x, r, room.width - r)
-	global_position.y = clampf(global_position.y, -100.0, room.floor_y - r * 0.5)
+	global_position.x = clampf(global_position.x, r, arena.width - r)
+	global_position.y = clampf(global_position.y, -100.0, arena.floor_y - r * 0.5)
 
 	var grounded_now := is_on_floor()
 	if grounded_now and not _was_floor and not flying:
@@ -83,12 +82,12 @@ func _contact() -> void:
 	if ai == "well" or (ai == "phantom" and invis):
 		return
 	if global_position.distance_to(p.global_position) < r + p.size:
-		if p.take_hit(dmg * dmg_mult() * (1.5 if state == "dash" else 1.0), global_position):
+		if p.take_hit(dmg * dmg_mult() * (1.5 if state == "dash" else 1.0), global_position, {"source": id}):
 			contact_cd = 0.8
 
 
 func _on_beat(n: int) -> void:
-	if dead or room == null or get_tree().paused or room.frozen or stun > 0.0 or not room.combat_active():
+	if dead or room == null or get_tree().paused or fight.frozen() or stun > 0.0 or not fight.combat_active():
 		return
 	ai_beat(n)
 
@@ -100,16 +99,9 @@ func _draw() -> void:
 		col = Pal.BLOOD
 	elif stun > 0.0:
 		col = Pal.INK.lerp(Pal.HUSH, 0.5)
-	if room.frozen:
+	if fight.frozen():
 		col = Pal.INK.lerp(Pal.MARGIN, 0.35)
-	if animator == null or not animator.has_sheet():
-		draw_body(col)
-	else:
-		# A faint violet haze behind the sprite: the Rest clinging to it.
-		draw_circle(Vector2(0, 2), r * 1.05, Color(Pal.HUSH, 0.10))
-		if elite:
-			draw_circle(Vector2.ZERO, r * 1.35, Color(Pal.family_color(family), 0.10 + 0.05 * sin(t * 4.0)))
-	_draw_tether_line()
+	draw_body(col)
 
 	if tether_t > 0.0:
 		draw_arc(Vector2.ZERO, r + 8.0, 0, TAU, 24, Color(Pal.STRING, 0.7), 2.0, true)
@@ -129,7 +121,7 @@ func _draw() -> void:
 		for i in 3:
 			var a := t * 5.0 + i * TAU / 3.0
 			draw_circle(Vector2(cos(a) * r * 0.8, -r - 8.0 + sin(a) * 4.0), 3.0, Pal.HUSH)
-	if room.frozen:
+	if fight.frozen():
 		Glyph.fermata(self, Vector2(0, -r - 18.0), 9.0, Pal.MARGIN)
 	if hp_bar_t > 0.0 and not boss and ai != "dummy":
 		var w := r * 2.4
@@ -137,10 +129,10 @@ func _draw() -> void:
 		draw_rect(Rect2(-w * 0.5, y, w, 4), Pal.INK_FAINT)
 		draw_rect(Rect2(-w * 0.5, y, w * clampf(hp / max_hp, 0.0, 1.0), 4), Pal.BLOOD)
 	if elite:
-		var f := Pal.serif()
-		var txt := ename
-		var tw := f.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
-		draw_string(f, Vector2(-tw * 0.5, -r - 44.0), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Pal.family_color(family))
+		if not WorldText.active():
+			var f := Pal.serif()
+			var tw := f.get_string_size(ename, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+			draw_string(f, Vector2(-tw * 0.5, -r - 44.0), ename, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Pal.family_color(family))
 		var w2 := r * 3.0
 		draw_rect(Rect2(-w2 * 0.5, -r - 38.0, w2, 3), Pal.INK_FAINT)
 		draw_rect(Rect2(-w2 * 0.5, -r - 38.0, w2 * clampf(hp / max_hp, 0.0, 1.0), 3), Pal.family_color(family))
@@ -154,6 +146,8 @@ func _accent_mark(at: Vector2) -> void:
 
 
 func draw_body(col: Color) -> void:
+	if _draw_body_sprite(col):
+		return
 	var s := r * 0.95
 	var glyph := id
 	var aura := Pal.family_color(family)
@@ -198,16 +192,60 @@ func draw_body(col: Color) -> void:
 	# A faint violet haze: the Tacet clinging to it.
 	draw_circle(Vector2(0, 2), r * 1.05, Color(Pal.HUSH, 0.12))
 	Glyph.rest(self, glyph, Vector2.ZERO, s, col, t, aura)
+	_draw_face()
+
+
+## The pixel-art body (EnemyArt placeholders), when "enemy_<id>" is switched on in
+## render_flags.tres. Returns false to fall back to the code drawing above.
+func _draw_body_sprite(col: Color) -> bool:
+	var key := "enemy_" + id
+	if not RenderAdapter.is_on(key):
+		return false
+	if id in EnemyArt.CUSTOM:
+		var tinted := RenderAdapter.sprite("%s_%s" % [key, _tint_name(col)])
+		if tinted == null:
+			return false
+		if id == "breath_well":
+			RenderAdapter.draw_art(self, tinted, Vector2.ZERO, Vector2(1.0 + 0.08 * sin(t * 4.0), 1.0))
+			var h := r * 2.4
+			for i in 3:
+				var yy := -h * 0.6 - 10.0 - fmod(t * 40.0 + i * 14.0, 40.0)
+				draw_arc(Vector2(0, yy), 6.0 + i * 2.0, PI * 1.1, PI * 1.9, 8, Color(Pal.WIND, 0.5), 2.0, true)
+		else:
+			RenderAdapter.draw_art(self, tinted)
+		return true
+	var body := RenderAdapter.sprite(key)
+	if body == null:
+		return false
+	if elite:
+		draw_circle(Vector2.ZERO, r * 1.35, Color(Pal.family_color(family), 0.12 + 0.05 * sin(t * 4.0)))
+		var crown := RenderAdapter.sprite(key + "_crown")
+		if crown:
+			RenderAdapter.draw_art(self, crown)
+	draw_circle(Vector2(0, 2), r * 1.05, Color(Pal.HUSH, 0.12))
+	RenderAdapter.draw_art(self, body, Vector2.ZERO, Vector2.ONE, col, t)
+	var accent := RenderAdapter.sprite(key + "_accent")
+	if accent:
+		RenderAdapter.draw_art(self, accent, Vector2.ZERO, Vector2.ONE, Color.WHITE, t)
+	_draw_face()
+	return true
+
+
+func _tint_name(col: Color) -> String:
+	for tint in EnemyArt.TINTS:
+		if col.is_equal_approx(EnemyArt.tint_colour(tint)):
+			return tint
+	return "ink"
+
+
+## Eyes, and the string to the player while tethering or binding.
+func _draw_face() -> void:
 	# Eyes — small, pale, always watching.
 	var ex := facing * r * 0.25
 	draw_circle(Vector2(ex - 3.0, -r * 0.3), 2.2, Pal.PAPER)
 	draw_circle(Vector2(ex + 3.0, -r * 0.3), 2.2, Pal.PAPER)
 	draw_circle(Vector2(ex - 3.0 + facing, -r * 0.3), 1.0, Pal.BLOOD)
 	draw_circle(Vector2(ex + 3.0 + facing, -r * 0.3), 1.0, Pal.BLOOD)
-
-
-## The wavy string from a Tether or Unison Rest to the player it has caught.
-func _draw_tether_line() -> void:
 	if (state == "tether" or state == "bind") and room.player:
 		var to: Vector2 = to_local(room.player.global_position)
 		var pts := PackedVector2Array()
@@ -215,3 +253,14 @@ func _draw_tether_line() -> void:
 			var k := i / 12.0
 			pts.append(Vector2.ZERO.lerp(to, k) + Vector2(0, sin(k * PI * 3.0 + t * 30.0) * 6.0))
 		draw_polyline(pts, Pal.STRING, 2.5, true)
+
+
+func _enter_tree() -> void:
+	add_to_group(WorldText.GROUP)
+
+
+## An elite's name, handed to WorldText to draw crisp over the pixel world.
+func world_text() -> Array:
+	if not elite:
+		return []
+	return [{"at": Vector2(0, -r - 44.0), "text": ename, "size": 13, "color": Pal.family_color(family), "regular": true}]

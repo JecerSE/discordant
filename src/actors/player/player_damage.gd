@@ -37,33 +37,42 @@ func deal(e: Node, base: float, info := {}) -> bool:
 		fade_bonus = false
 		fade_t = 0.0
 	if Game.flag("out_of_tune") > 0.0:
-		mult *= randf_range(0.2, 3.0)
+		mult *= Game.stream("combat").randf_range(0.2, 3.0)
 	var dim := Game.flag("diminution")
 	if dim > 0.0 and e.r > size:
 		mult *= 1.0 + minf(dim, (e.r - size) / size * 0.4)
 	# A Unison Rest that has bound you gives every blow straight back.
 	if e.has_method("redirects") and e.redirects(self):
 		var back := base * mult
-		room.float_text(e.global_position + Vector2(0, -e.r - 12), "unison!", Pal.STRING, 18)
-		take_hit(back, e.global_position, {"unblockable": true})
+		fx.float_text(e.global_position + Vector2(0, -e.r - 12), "unison!", Pal.STRING, 18)
+		take_hit(back, e.global_position, {"unblockable": true, "source": e.id})
 		return false
 	var amount := base * mult
 
-	if room.frozen:
+	if fight.frozen():
 		# Fermata: written down now, paid when time resumes.
 		e.stored_damage += amount * 1.5
-		room.show_damage(e, e.r, amount, DamageNumbers.Style.STORED)
+		fx.show_damage(e, e.r, amount, DamageNumbers.Style.STORED)
 		return false
 
 	var killed: bool = e.take_damage(amount, info)
+	if Game.has_run():
+		# By power_id when the hit is attributable to a specific power (soundwave and shockwave
+		# fire a "proj"/melee-hybrid hit, not a "power"-kind one, so this can't be gated on
+		# kind alone); otherwise by the broad kind bucket (melee/power/proj).
+		var key: String = ("power:%s" % info.power_id) if info.has("power_id") else kind
+		Game.run.dmg_dealt[key] = Game.run.dmg_dealt.get(key, 0.0) + amount
+		Game.run.dmg_log.append([Game.run_time(), amount])
+		var gname: String = BeatGrader.Grade.keys()[grade]
+		Game.run.grade_hist[gname] = Game.run.grade_hist.get(gname, 0) + 1
 	var number_style := DamageNumbers.Style.ON_BEAT if on_beat else (DamageNumbers.Style.NORMAL if proc else DamageNumbers.Style.FOLLOW_UP)
-	room.show_damage(e, e.r, amount, number_style)
+	fx.show_damage(e, e.r, amount, number_style)
 	if not on_beat:
 		Synth.sfx_play("hit", -9.0, 2.0)
 	var sp := FX.Splat.new()
 	sp.setup(5 if not on_beat else 9, 220.0, Pal.GOLD if on_beat else Pal.INK)
 	sp.position = e.global_position
-	room.add_fx(sp)
+	fx.add_fx(sp)
 
 	if s.lifesteal > 0.0:
 		heal(amount * s.lifesteal, false)
@@ -77,16 +86,16 @@ func deal(e: Node, base: float, info := {}) -> bool:
 		return killed
 
 	# Kazoo: some rests simply die laughing.
-	if not killed and Game.flag("kazoo") > 0.0 and not e.boss and randf() < Game.flag("kazoo"):
-		room.float_text(e.global_position + Vector2(0, -e.r - 30), "hah!", Pal.MARGIN, 24)
+	if not killed and Game.flag("kazoo") > 0.0 and not e.boss and Game.stream("combat").randf() < Game.flag("kazoo"):
+		fx.float_text(e.global_position + Vector2(0, -e.r - 30), "hah!", Pal.MARGIN, 24)
 		killed = e.take_damage(999999.0, {"kind": "kazoo"})
 
 	# Tether: harmony shares the pain.
 	if e.tether_t > 0.0 and not info.get("shared", false):
-		for o in room.alive_enemies():
+		for o in enemy_roster.alive_enemies():
 			if o != e and o.tether_t > 0.0:
 				o.take_damage(amount * 0.6, {"kind": "shared"})
-				room.show_damage(o, o.r, amount * 0.6, DamageNumbers.Style.SHARED)
+				fx.show_damage(o, o.r, amount * 0.6, DamageNumbers.Style.SHARED)
 
 	# Echo: everything repeats one beat later.
 	var wr: WeakRef = weakref(e)
@@ -94,7 +103,7 @@ func deal(e: Node, base: float, info := {}) -> bool:
 		_later(Beat.beat_len() / Beat.tempo_scale, _echo_hit.bind(wr, amount))
 
 	if kind == "melee":
-		if char_id == "half":
+		if char_id == ContentIds.CharacterIds.HALF:
 			_later(Beat.beat_len() * 0.5 / Beat.tempo_scale, _late_hit.bind(wr, base * 0.45))
 		if Game.flag("double_stop") > 0.0:
 			_later(0.08, _late_hit.bind(wr, base * Game.flag("double_stop")))
@@ -105,10 +114,10 @@ func deal(e: Node, base: float, info := {}) -> bool:
 			r.info = {"kind": "melee", "proc": false}
 			r.color = Pal.PERCUSSION
 			r.position = e.global_position
-			room.add_fx(r)
+			fx.add_fx(r)
 			Synth.sfx_play("crash", -14.0)
 		var pz := Game.flag("pizzicato")
-		if pz > 0.0 and randf() < pz:
+		if pz > 0.0 and Game.stream("combat").randf() < pz:
 			Powers.fire_wave(self as Player, 8.0, 0.7, false)
 		var mn := int(Game.flag("mallet_shock"))
 		if mn > 0:
@@ -134,7 +143,7 @@ func _echo_hit(wr: WeakRef, amount: float) -> void:
 	var e = wr.get_ref()
 	if e and not e.dead:
 		e.take_damage(amount, {"kind": "echo"})
-		room.show_damage(e, e.r, amount, DamageNumbers.Style.ECHO)
+		fx.show_damage(e, e.r, amount, DamageNumbers.Style.ECHO)
 		Synth.sfx_play("ping", -18.0, 5.0)
 
 
@@ -190,24 +199,27 @@ func take_hit(amount: float, from: Vector2, opts := {}) -> bool:
 		amount = maxf(amount, max_hp * Game.flag("glass"))
 	amount = round(amount)
 	hp -= amount
+	if Game.has_run():
+		var src: String = opts.get("source", "environment")
+		Game.run.dmg_taken[src] = Game.run.dmg_taken.get(src, 0.0) + amount
 	iframes = 0.8 * (1.0 + Game.flag("iframe_bonus"))
 	hurt_flash = 0.25
 	still_t = 0.0
 	fade_t = 0.0
 	crescendo = 0
-	if char_id != "whole":
+	if char_id != ContentIds.CharacterIds.WHOLE:
 		var away := signf(global_position.x - from.x)
 		if away == 0.0:
 			away = -facing
 		velocity = Vector2(away * 340.0, -360.0)
-	room.shake(8.0)
-	room.hurt_flash()
+	fx.shake(8.0)
+	fx.hurt_flash()
 	Synth.sfx_play("hurt", -4.0)
-	room.float_text(global_position + Vector2(0, -40), "-%d" % int(amount), Pal.BLOOD, 22)
+	fx.float_text(global_position + Vector2(0, -40), "-%d" % int(amount), Pal.BLOOD, 22)
 	var sp := FX.Splat.new()
 	sp.setup(10, 260.0, Pal.BLOOD)
 	sp.position = global_position
-	room.add_fx(sp)
+	fx.add_fx(sp)
 	var cr := Game.flag("cello_reverb")
 	if cr > 0.0:
 		var r := FX.Ring.new()
@@ -216,16 +228,18 @@ func take_hit(amount: float, from: Vector2, opts := {}) -> bool:
 		r.info = {"kind": "power", "proc": false}
 		r.color = Pal.STRING
 		r.position = global_position
-		room.add_fx(r)
+		fx.add_fx(r)
 	if hp <= 0.0:
 		if Game.flag("coda") > 0.0 and not Game.run.coda_used:
 			Game.run.coda_used = true
 			hp = 1.0
 			iframes = 2.0
-			room.announce("CODA", "saved at 1 HP", Pal.GOLD)
+			fx.announce("CODA", "saved at 1 HP", Pal.GOLD)
 			Synth.sfx_play("chime")
 		else:
 			hp = 0.0
+			if Game.has_run():
+				Game.run.death_enemy = opts.get("source", "environment")
 			_die()
 	Game.run.hp = hp
 	return true
@@ -236,9 +250,9 @@ func _parry_success(from: Vector2) -> void:
 	primed = true
 	iframes = 0.35
 	Synth.sfx_play("ping", -4.0)
-	room.shake(4.0)
-	room.float_text(global_position + Vector2(0, -44), "PARRY", Pal.PERCUSSION, 22)
-	for e in room.enemies_in_circle(from, 120.0):
+	fx.shake(4.0)
+	fx.float_text(global_position + Vector2(0, -44), "PARRY", Pal.PERCUSSION, 22)
+	for e in enemy_roster.enemies_in_circle(from, 120.0):
 		e.apply_stun(1.2)
 	var slot := Powers.slot_of(self as Player, "parry")
 	if slot >= 0:
@@ -256,7 +270,7 @@ func _release_shield() -> void:
 	r.info = {"kind": "power"}
 	r.color = Pal.STRING
 	r.position = global_position
-	room.add_fx(r)
+	fx.add_fx(r)
 	Synth.sfx_play("zap", -8.0)
 	shield_absorbed = 0.0
 
@@ -267,8 +281,10 @@ func heal(n: float, show := true) -> void:
 	var before := hp
 	hp = minf(max_hp, hp + n)
 	Game.run.hp = hp
+	if Game.has_run():
+		Game.run.healing += hp - before
 	if show and hp - before >= 1.0:
-		room.float_text(global_position + Vector2(0, -44), "+%d" % int(hp - before), Pal.HEAL, 20)
+		fx.float_text(global_position + Vector2(0, -44), "+%d" % int(hp - before), Pal.HEAL, 20)
 
 
 func _die() -> void:
@@ -276,11 +292,11 @@ func _die() -> void:
 	controllable = false
 	velocity = Vector2.ZERO
 	Synth.sfx_play("die")
-	room.on_player_died()
+	reward_flow.on_player_died()
 
 
 func add_push(v: Vector2) -> void:
-	if char_id == "whole":
+	if char_id == ContentIds.CharacterIds.WHOLE:
 		v *= 0.4
 	push += v
 	if absf(v.x) >= MOVE_TUNING.momentum_push_threshold:

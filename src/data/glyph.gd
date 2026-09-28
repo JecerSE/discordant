@@ -43,31 +43,48 @@ static func whole_head(ci: CanvasItem, pos: Vector2, size: float, color: Color, 
 
 
 ## A player-character note. `stem_angle` sways the stem; `squash` flattens on landing.
+## Parts of a note, for drawing some of them (the head can come from a sprite).
+const NOTE_STEM := 1
+const NOTE_HEAD := 2
+const NOTE_EYES := 4
+
+
 static func note(ci: CanvasItem, kind: String, pos: Vector2, facing: float, size: float, color: Color,
-		stem_angle := 0.0, squash := 1.0, paper := Pal.PAPER, blink := false) -> void:
+		stem_angle := 0.0, squash := 1.0, paper := Pal.PAPER, blink := false, parts := 7) -> void:
+	var stem_on := parts & NOTE_STEM != 0
+	var head_on := parts & NOTE_HEAD != 0
 	var sz := size
 	var hp := pos
 	var stem_len := size * 3.4
 	var sx := facing
 	var head_offset := Vector2(size * 1.05 * sx, -size * 0.25)
 	match kind:
-		"whole":
-			whole_head(ci, hp, sz * 1.1, color, paper)
-		"half":
-			_stem(ci, hp + head_offset, stem_len, stem_angle * sx, color, size)
-			head(ci, hp, sz, false, color, paper)
-		"eighth":
-			var top := _stem(ci, hp + head_offset, stem_len, stem_angle * sx, color, size)
-			_flag(ci, top, sx, size, color, 1)
-			head(ci, hp, sz, true, color)
+		ContentIds.CharacterIds.WHOLE:
+			if head_on:
+				whole_head(ci, hp, sz * 1.1, color, paper)
+		ContentIds.CharacterIds.HALF:
+			if stem_on:
+				_stem(ci, hp + head_offset, stem_len, stem_angle * sx, color, size)
+			if head_on:
+				head(ci, hp, sz, false, color, paper)
+		ContentIds.CharacterIds.EIGHTH:
+			if stem_on:
+				var top := _stem(ci, hp + head_offset, stem_len, stem_angle * sx, color, size)
+				_flag(ci, top, sx, size, color, 1)
+			if head_on:
+				head(ci, hp, sz, true, color)
 		_:
-			_stem(ci, hp + head_offset, stem_len, stem_angle * sx, color, size)
-			head(ci, hp, sz, true, color)
+			if stem_on:
+				_stem(ci, hp + head_offset, stem_len, stem_angle * sx, color, size)
+			if head_on:
+				head(ci, hp, sz, true, color)
+	if parts & NOTE_EYES == 0:
+		return
 	# Eyes — paper on a filled head, ink on a hollow one, perched on the hollow's rim.
-	var eye_col := paper if (kind == "quarter" or kind == "eighth") else color
+	var eye_col := paper if (kind == ContentIds.CharacterIds.QUARTER or kind == ContentIds.CharacterIds.EIGHTH) else color
 	var ex := size * 0.45 * sx
-	var ey := -size * 0.15 if (kind == "quarter" or kind == "eighth") else -size * 0.55
-	if kind == "whole":
+	var ey := -size * 0.15 if (kind == ContentIds.CharacterIds.QUARTER or kind == ContentIds.CharacterIds.EIGHTH) else -size * 0.55
+	if kind == ContentIds.CharacterIds.WHOLE:
 		ey = -size * 0.55
 		ex = size * 0.7 * sx
 	var eh := size * 0.08 if blink else size * 0.22 * squash
@@ -93,7 +110,15 @@ static func _flag(ci: CanvasItem, top: Vector2, sx: float, size: float, color: C
 
 # --- rests: the Tacet's soldiers --------------------------------------------------------------
 
-static func rest(ci: CanvasItem, kind: String, pos: Vector2, s: float, color: Color, t := 0.0, accent := Color(0, 0, 0, 0)) -> void:
+## `layers`: REST_BODY (the rest in `color`), REST_ACCENT (the parts in `accent`: the tether
+## ring, the gust lines), or both (the default). Sprites render the layers separately.
+const REST_BODY := 1
+const REST_ACCENT := 2
+
+
+static func rest(ci: CanvasItem, kind: String, pos: Vector2, s: float, color: Color, t := 0.0, accent := Color(0, 0, 0, 0), layers := 3) -> void:
+	var body := layers & REST_BODY != 0
+	var acc := layers & REST_ACCENT != 0
 	match kind:
 		"quarter_rest", "tether_rest":
 			var pts := PackedVector2Array([
@@ -102,12 +127,14 @@ static func rest(ci: CanvasItem, kind: String, pos: Vector2, s: float, color: Co
 			var out := PackedVector2Array()
 			for p in pts:
 				out.append(pos + p * s + Vector2(sin(t * 6.0 + p.y * 2.0) * s * 0.06, 0))
-			ci.draw_polyline(out, color, s * 0.42, true)
-			if kind == "tether_rest":
+			if body:
+				ci.draw_polyline(out, color, s * 0.42, true)
+			if kind == "tether_rest" and acc:
 				ci.draw_arc(pos + Vector2(0, -s * 1.5), s * 0.45, 0, TAU, 16, accent if accent.a > 0 else color, s * 0.14, true)
 		"eighth_rest", "sixteenth_rest", "gust_rest":
-			var dots := 1 if kind != "sixteenth_rest" else 2
-			ci.draw_line(pos + Vector2(s * 0.55, -s * 1.1), pos + Vector2(-s * 0.2, s * 1.2), color, s * 0.26, true)
+			var dots := 0 if not body else (2 if kind == "sixteenth_rest" else 1)
+			if body:
+				ci.draw_line(pos + Vector2(s * 0.55, -s * 1.1), pos + Vector2(-s * 0.2, s * 1.2), color, s * 0.26, true)
 			for d in dots:
 				var dp := pos + Vector2(-s * 0.45 + d * s * 0.3, -s * 0.85 + d * s * 0.75)
 				ci.draw_circle(dp, s * 0.36, color)
@@ -116,11 +143,13 @@ static func rest(ci: CanvasItem, kind: String, pos: Vector2, s: float, color: Co
 					var k := i / 6.0
 					arc.append(dp + Vector2(s * 0.2 + k * s * 0.8, s * 0.25 - sin(k * PI) * s * 0.35))
 				ci.draw_polyline(arc, color, s * 0.16, true)
-			if kind == "gust_rest":
+			if kind == "gust_rest" and acc:
 				for w in 3:
 					var y := pos.y + (w - 1) * s * 0.7
 					var off := fmod(t * 120.0 + w * 20.0, s * 1.6)
 					ci.draw_line(Vector2(pos.x - s * 1.8 + off, y), Vector2(pos.x - s * 1.1 + off, y), accent if accent.a > 0 else color, 2.0, true)
+		_ when not body:
+			pass
 		"whole_rest":
 			ci.draw_line(pos + Vector2(-s * 1.4, -s * 0.5), pos + Vector2(s * 1.4, -s * 0.5), color, 3.0, true)
 			ci.draw_rect(Rect2(pos + Vector2(-s * 0.9, -s * 0.5), Vector2(s * 1.8, s * 0.9)), color)

@@ -2,9 +2,6 @@ class_name HudRoomStatus
 extends HudWidget
 ## Top-right: which bar you're in and what the room still wants from you.
 
-## How far above or below (px) the exit must be before the hint says so.
-const VERTICAL_HINT_PX := 160.0
-
 
 func _draw() -> void:
 	if room == null:
@@ -15,28 +12,15 @@ func _draw() -> void:
 	var line := ""
 	var col := Pal.INK_SOFT
 	if room.state == "fight" and room.type != "boss":
-		var n: int = room.alive_enemies().size() + room.pending_spawns
+		var n: int = enemy_roster.alive_enemies().size() + enemy_roster.pending_spawns
 		var waves_left: int = room.waves.size() - room.wave_i - 1
 		line = "%d rest%s remain" % [n, "" if n == 1 else "s"]
 		if waves_left > 0:
 			line += "  ·  %d more wave%s" % [waves_left, "" if waves_left == 1 else "s"]
 		col = Pal.HUSH
 	elif room.state == "clear" and room.has_exit:
-		line = "exit is open" + _direction()
+		line = "exit is open  →"
 	if room.type == "hub":
 		line = "walk right to start  →"
 	if line != "":
 		UI.text(self, Vector2(right, 58), line, 15, col, HORIZONTAL_ALIGNMENT_RIGHT)
-
-
-## Which way the exit is from the player: the door can be up a climb, at the bottom of a
-## descent, or on a platform in an arena.
-func _direction() -> String:
-	if room.player == null:
-		return ""
-	var d: Vector2 = room.exit_pos - room.player.global_position
-	if d.y < -VERTICAL_HINT_PX:
-		return ", climb up"
-	if d.y > VERTICAL_HINT_PX:
-		return ", down below"
-	return "  →" if d.x >= 0.0 else "  ←"

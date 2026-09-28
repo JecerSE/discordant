@@ -22,12 +22,12 @@ const CLIMB = PagesData.CLIMB
 const CLEFS = PagesData.CLEFS
 const TEACHERS = StoryData.TEACHERS
 const MARGIN_INTRO = StoryData.MARGIN_INTRO
-const INTRO_SHOTS = IntroData.SHOTS
+const PROLOGUE = StoryData.PROLOGUE
 const ENDINGS = StoryData.ENDINGS
 
 
 static func character(id: String) -> Dictionary:
-	return CHARACTERS.get(id, CHARACTERS["quarter"])
+	return CHARACTERS.get(id, CHARACTERS[ContentIds.CharacterIds.QUARTER])
 
 
 static func item(id: String) -> Dictionary:

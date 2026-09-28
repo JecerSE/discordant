@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="VoidLook" format=3]
+
+[ext_resource type="Script" path="res://src/art/void_look.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+start_hush = 0.2
+full_hush = 1.0
+desaturate = 0.85
+particle_keep = 0.2
+flat_alpha = 0.03

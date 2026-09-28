@@ -6,8 +6,6 @@ extends SceneTree
 ##   #4  floor features keep their minimum spacing and clear the spawn and exit
 ##   #25 no enemy type exceeds its per-wave cap; waves mix types
 ##   #8  bars have the tuned number of layers and every special room
-##       room shapes: every shape's platforms, spawn and exit are reachable and in bounds,
-##       and every platform has inked in before the first wave arrives
 
 const SEEDS := 300
 const LINE_YS := [550.0, 440.0, 330.0, 220.0, 110.0]
@@ -25,7 +23,6 @@ func _initialize() -> void:
 		_check_features(rng, s, tuning)
 		_check_waves(rng, s, tuning)
 		_check_bar(rng, s, tuning)
-		_check_shape(rng, s, tuning)
 	if _failures == 0:
 		print("test_generation: ok (%d seeds)" % SEEDS)
 	quit(1 if _failures > 0 else 0)
@@ -89,68 +86,3 @@ func _check_bar(rng: RandomNumberGenerator, s: int, tuning: LevelGenTuning) -> v
 		var needed := Array(tuning.special_rooms).count(kind)
 		if found.get(kind, 0) < needed:
 			_fail("seed %d: bar missing a %s room" % [s, kind])
-
-
-class FakeRoom extends Node:
-	var type := "combat"
-	var family := "ledger"
-	var shape := "corridor"
-	var width := 0.0
-	var height := 0.0
-	var floor_y := 0.0
-	var systems := 1
-	var line_ys: Array = []
-	var segments: Array = []
-	var spawn_pos := Vector2.ZERO
-	var exit_pos := Vector2.ZERO
-	var exit_rect := Rect2()
-	var exit_hidden := false
-
-
-func _check_shape(rng: RandomNumberGenerator, s: int, tuning: LevelGenTuning) -> void:
-	var shape: String = RoomShape.SHAPES[s % RoomShape.SHAPES.size()]
-	var room := FakeRoom.new()
-	room.family = ["ledger", "percussion", "wind", "string"][s % 4]
-	room.shape = shape
-	RoomShape.configure_levels(room, RoomShape.systems_for(shape, rng))
-	room.width = ShapeBuilder.width_for(room, rng)
-	StaffInker.ink(room, rng, StaffInker.densities(room.family))
-	ShapeBuilder.place_entrances(room, rng)
-	var tag := "seed %d %s" % [s, shape]
-	var expected_levels := RoomShape.LINES_PER_SYSTEM + RoomShape.LEVELS_PER_SYSTEM * (room.systems - 1)
-	if room.line_ys.size() != expected_levels or not is_equal_approx(room.height - room.floor_y, RoomShape.FLOOR_DEPTH):
-		_fail("%s: %d levels for %d staves" % [tag, room.line_ys.size(), room.systems])
-	var reached := PlatformReachability.reachable_set(room.segments, room.line_ys)
-	if reached.size() != room.segments.size():
-		_fail("%s: %d platforms unreachable" % [tag, room.segments.size() - reached.size()])
-	if not Rect2(0, 0, room.width, room.height).encloses(room.exit_rect):
-		_fail("%s: exit %s outside the room" % [tag, room.exit_rect])
-	if not _on_surface(room, room.exit_pos):
-		_fail("%s: exit door at %s stands on nothing" % [tag, room.exit_pos])
-	if not _on_surface(room, room.spawn_pos + Vector2(0, ShapeBuilder.SPAWN_LIFT)):
-		_fail("%s: spawn %s is over nothing" % [tag, room.spawn_pos])
-	match shape:
-		"climb":
-			if room.exit_pos.y != room.line_ys.back():
-				_fail("%s: climb exit is not on the top line" % tag)
-		"descent":
-			if room.spawn_pos.y > room.line_ys.back():
-				_fail("%s: descent does not start at the top" % tag)
-		"arena":
-			if not room.exit_hidden:
-				_fail("%s: arena exit is not hidden until the clear" % tag)
-	PlatformInk.schedule(room.segments, room.spawn_pos)
-	for seg in room.segments:
-		if seg.pop_at + tuning.pop_duration > 1.0:
-			_fail("%s: a platform finishes inking at %.2f s, after the first wave" % [tag, seg.pop_at + tuning.pop_duration])
-			break
-	room.free()
-
-
-func _on_surface(room: FakeRoom, p: Vector2) -> bool:
-	if is_equal_approx(p.y, room.floor_y):
-		return true
-	for seg in room.segments:
-		if is_equal_approx(seg.y, p.y) and p.x >= seg.x0 and p.x <= seg.x1:
-			return true
-	return false

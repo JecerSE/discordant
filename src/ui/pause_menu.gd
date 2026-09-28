@@ -74,3 +74,4 @@ func _draw() -> void:
 			draw_rect(rr, Color(Pal.GOLD, 0.15))
 			draw_rect(Rect2(rr.position, Vector2(4, 40)), Pal.GOLD)
 		UI.text(self, rr.position + Vector2(18, 27), items[k], 18, Pal.INK)
+	UI.text(self, Vector2(size.x - 24, size.y - 16), BuildStamp.report_line(Game.run), 13, Pal.PAPER, HORIZONTAL_ALIGNMENT_RIGHT)

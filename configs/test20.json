@@ -1,0 +1,7 @@
+{
+  "id": "test20",
+  "runs": 20,
+  "characters": ["quarter", "whole", "half", "eighth"],
+  "base_seed": 90210,
+  "clefs": false
+}

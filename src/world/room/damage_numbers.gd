@@ -39,7 +39,7 @@ func show(host: Node, target: Node2D, radius: float, amount: float, style: Style
 	n.base_size = TUNING.on_beat_font_size if style == Style.ON_BEAT else (TUNING.damage_font_size if CHANNEL[style] == 0 else TUNING.channel_font_size)
 	n.pop_size = TUNING.merge_pop_size
 	n.size = n.base_size
-	n.position = target.global_position + Vector2(randf_range(-8.0, 8.0), -radius - 12.0 - 14.0 * CHANNEL[style])
+	n.position = target.global_position + Vector2(Game.stream("cosmetic").randf_range(-8.0, 8.0), -radius - 12.0 - 14.0 * CHANNEL[style])
 	n.add(amount, _color(style))
 	host.add_fx(n)
 	_open[key] = {"node": weakref(n), "until_ms": now + TUNING.damage_merge_window_ms}

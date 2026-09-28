@@ -7,6 +7,7 @@ var dmg := 16.0
 var vertical := true
 var length := 720.0
 var color := Pal.STRING
+var source_id := ""          # the boss that placed this, for damage-taken attribution
 var _struck := false
 
 func _init() -> void:
@@ -25,7 +26,7 @@ func tick(_delta: float) -> void:
 		else:
 			hit = absf(p.global_position.y - global_position.y) < x_width * 0.5 + 12.0
 		if hit:
-			p.take_hit(dmg, p.global_position + Vector2(0, -10))
+			p.take_hit(dmg, p.global_position + Vector2(0, -10), {"source": source_id})
 
 func _draw() -> void:
 	if t < warn:

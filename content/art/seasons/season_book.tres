@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SeasonBook" format=3]
+
+[ext_resource type="Script" path="res://src/art/season_book.gd" id="1_8lcpt"]
+[ext_resource type="Script" path="res://src/art/season.gd" id="2_f56pb"]
+[ext_resource type="Resource" path="res://content/art/seasons/autumn.tres" id="3_4hx7a"]
+[ext_resource type="Resource" path="res://content/art/seasons/summer.tres" id="4_l1lot"]
+[ext_resource type="Resource" path="res://content/art/seasons/winter.tres" id="5_nvsf0"]
+
+[resource]
+script = ExtResource("1_8lcpt")
+seasons = Array[ExtResource("2_f56pb")]([ExtResource("3_4hx7a"), ExtResource("4_l1lot"), ExtResource("5_nvsf0")])

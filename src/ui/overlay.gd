@@ -4,6 +4,7 @@ extends Control
 ## Input is read by polling actions so keyboard, controller and mouse all work the same.
 
 var room: Node
+var enemy_roster: EnemyRoster
 var _grace := 0.18
 var _hover := -1
 
@@ -15,8 +16,11 @@ func _ready() -> void:
 	Synth.sfx_play("tick", -8.0)
 
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	queue_redraw()
+
+
+func _physics_process(delta: float) -> void:
 	if _grace > 0.0:
 		_grace -= delta
 		return
@@ -64,6 +68,7 @@ func close() -> void:
 ## plain screen like the title or the map.
 func replace_with(next: Overlay) -> void:
 	next.room = room
+	next.enemy_roster = enemy_roster
 	if room != null and room.has_method("open_overlay"):
 		room.open_overlay(next)
 	else:

@@ -4,16 +4,16 @@ extends PlayerDamage
 ## content/combat/), swings that follow the player, rhythm combos, dash.
 
 const ATTACK_SETS := {
-	"quarter": preload("res://content/combat/quarter_attacks.tres"),
-	"half": preload("res://content/combat/half_attacks.tres"),
-	"whole": preload("res://content/combat/whole_attacks.tres"),
-	"eighth": preload("res://content/combat/eighth_attacks.tres"),
+	ContentIds.CharacterIds.QUARTER: preload("res://content/combat/quarter_attacks.tres"),
+	ContentIds.CharacterIds.HALF: preload("res://content/combat/half_attacks.tres"),
+	ContentIds.CharacterIds.WHOLE: preload("res://content/combat/whole_attacks.tres"),
+	ContentIds.CharacterIds.EIGHTH: preload("res://content/combat/eighth_attacks.tres"),
 }
 const COMBO_SETS := {
-	"quarter": preload("res://content/combat/quarter_combos.tres"),
-	"half": preload("res://content/combat/half_combos.tres"),
-	"whole": preload("res://content/combat/whole_combos.tres"),
-	"eighth": preload("res://content/combat/eighth_combos.tres"),
+	ContentIds.CharacterIds.QUARTER: preload("res://content/combat/quarter_combos.tres"),
+	ContentIds.CharacterIds.HALF: preload("res://content/combat/half_combos.tres"),
+	ContentIds.CharacterIds.WHOLE: preload("res://content/combat/whole_combos.tres"),
+	ContentIds.CharacterIds.EIGHTH: preload("res://content/combat/eighth_combos.tres"),
 }
 
 
@@ -71,7 +71,7 @@ func _attack() -> void:
 	var haste: float = 1.0 + s.atk_speed + (0.5 if accel_t > 0.0 else 0.0)
 	if fade_t > 0.0:
 		fade_bonus = true
-	room.grade_feedback(global_position + Vector2(0, -size * 3.5), g)
+	fx.grade_feedback(global_position + Vector2(0, -size * 3.5), g)
 	if on_beat:
 		Synth.sfx_play("hit_beat", -10.0)
 	if not pending_combo.is_empty():
@@ -79,7 +79,7 @@ func _attack() -> void:
 		pending_combo = {}
 		atk_cd = 0.3 / haste
 		return
-	if char_id == "whole" and not is_on_floor():
+	if char_id == ContentIds.CharacterIds.WHOLE and not is_on_floor():
 		diving = "pound"
 		dive_dmg = 30.0
 		atk_cd = 0.5 / haste
@@ -96,14 +96,14 @@ func _attack() -> void:
 	if not down:
 		combo = (combo + 1) % set.steps.size()
 		combo_t = set.combo_reset
-	Synth.sfx_play("kick" if char_id == "whole" else "whoosh", -6.0 if char_id == "whole" else -16.0, 0.0 if char_id == "whole" else 4.0)
+	Synth.sfx_play("kick" if char_id == ContentIds.CharacterIds.WHOLE else "whoosh", -6.0 if char_id == ContentIds.CharacterIds.WHOLE else -16.0, 0.0 if char_id == ContentIds.CharacterIds.WHOLE else 4.0)
 
 
 ## Starts a swing that follows the player (issue #10). A down strike that connects
 ## bounces the player up.
 func _spawn_swing(step: AttackStep, info: Dictionary, down: bool) -> void:
 	var sw := MeleeSwing.new()
-	sw.setup(room, step, facing, step.damage, info)
+	sw.setup(room, enemy_roster, reward_flow, step, facing, step.damage, info)
 	sw.struck.connect(_on_swing_struck)
 	if down:
 		sw.landed_first_hit.connect(_on_down_strike_landed)
@@ -129,16 +129,16 @@ func _slash(radius: float, col: Color, flip := false) -> void:
 		sl.arc_from = 1.0
 		sl.arc_to = -1.2
 	sl.position = global_position + Vector2(facing * 6.0, -4.0)
-	room.add_fx(sl)
+	fx.add_fx(sl)
 
 
 ## An instant rectangular hit in front of the player. Used by powers (Drumroll).
 func _melee_rect(offset: Vector2, box: Vector2, dmg: float, knock: Vector2, on_beat: bool, extra := {}) -> int:
 	var center := global_position + Vector2(offset.x * facing, offset.y)
 	var rect := Rect2(center - box * 0.5, box)
-	room.on_player_strike(rect, on_beat)
+	reward_flow.on_player_strike(rect, on_beat)
 	var n := 0
-	for e in room.alive_enemies():
+	for e in enemy_roster.alive_enemies():
 		if rect.grow(e.r * 0.7).has_point(e.global_position):
 			var info := {"kind": "melee", "on_beat": on_beat, "knock": Vector2(knock.x * facing, knock.y)}
 			info.merge(extra, true)
@@ -166,7 +166,7 @@ func _start_dash(power: bool, dist := 0.0, dmg := 0.0) -> void:
 			dash_t *= 1.0 + MOVE_TUNING.beat_dash_bonus
 		dash_cd = DASH_CD * (1.0 - clampf(stats().dash_cdr, 0.0, 0.8))
 		var cut := 0.0
-		if char_id == "eighth":
+		if char_id == ContentIds.CharacterIds.EIGHTH:
 			cut += 9.0
 		cut += Game.flag("piper_dash")
 		dash_dmg = cut
@@ -178,13 +178,16 @@ func _start_dash(power: bool, dist := 0.0, dmg := 0.0) -> void:
 func _dash_hits() -> void:
 	if dash_dmg <= 0.0:
 		return
-	for e in room.alive_enemies():
+	for e in enemy_roster.alive_enemies():
 		var id: int = e.get_instance_id()
 		if dash_hit.has(id):
 			continue
 		if global_position.distance_to(e.global_position) < e.r + size * 1.6:
 			dash_hit[id] = true
-			var killed := deal(e, dash_dmg, {"kind": "power" if dash_power else "melee", "knock": Vector2(dash_dir * 120.0, -160.0)})
+			var info := {"kind": "power" if dash_power else "melee", "knock": Vector2(dash_dir * 120.0, -160.0)}
+			if dash_power:
+				info["power_id"] = "gale_dash"
+			var killed := deal(e, dash_dmg, info)
 			if killed and dash_power:
 				var slot := Powers.slot_of(self as Player, "gale_dash")
 				if slot >= 0:
@@ -201,4 +204,4 @@ func _end_dash() -> void:
 		tr.b = global_position
 		tr.dmg = 8.0
 		tr.info = {"kind": "power"}
-		room.add_fx(tr)
+		fx.add_fx(tr)

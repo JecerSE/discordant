@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="WorldViewTuning" format=3]
+
+[ext_resource type="Script" path="res://src/data/tuning/world_view_tuning.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+resolution = Vector2i(720, 405)
+view = Vector2i(1280, 720)

@@ -5,9 +5,11 @@ class_name RestPowers
 
 static func cast(p: Player, id: String, dmg: float, lvl: int, info: Dictionary) -> bool:
 	var room = p.room
+	var fx: RoomFx = p.fx
+	var enemy_roster: EnemyRoster = p.enemy_roster
 	match id:
 		"fermata":
-			room.start_fermata(3.0)
+			p.fight.start_fermata(3.0)
 		"caesura":
 			p.caesura_t = 2.0
 			p.velocity = Vector2.ZERO
@@ -19,7 +21,7 @@ static func cast(p: Player, id: String, dmg: float, lvl: int, info: Dictionary) 
 			var ghost := FX.Splat.new()
 			ghost.setup(14, 200.0, Pal.MARGIN)
 			ghost.position = p.global_position
-			room.add_fx(ghost)
+			fx.add_fx(ghost)
 			p.global_position = then.p
 			p.velocity = Vector2.ZERO
 			p.hp = maxf(p.hp, then.hp)
@@ -28,7 +30,7 @@ static func cast(p: Player, id: String, dmg: float, lvl: int, info: Dictionary) 
 			p.history.clear()
 			Synth.sfx_play("chime", -6.0)
 		"grace_note":
-			var e = room.nearest_enemy(p.global_position, 520.0)
+			var e = enemy_roster.nearest_enemy(p.global_position, 520.0)
 			if e == null:
 				Synth.sfx_play("error", -16.0)
 				return false
@@ -36,8 +38,8 @@ static func cast(p: Player, id: String, dmg: float, lvl: int, info: Dictionary) 
 			if side == 0.0:
 				side = 1.0
 			var dest: Vector2 = e.global_position + Vector2(side * (e.r + 26.0), 0)
-			dest.x = clampf(dest.x, 40.0, room.width - 40.0)
-			room.add_line_fx(p.global_position, dest, Pal.MARGIN)
+			dest.x = clampf(dest.x, 40.0, p.arena.width - 40.0)
+			fx.add_line_fx(p.global_position, dest, Pal.MARGIN)
 			p.global_position = dest
 			p.velocity = Vector2.ZERO
 			p.facing = -side
@@ -52,14 +54,14 @@ static func cast(p: Player, id: String, dmg: float, lvl: int, info: Dictionary) 
 			p.accel_t = 5.0
 			Beat.tempo_scale = 2.0
 			room.enemy_speed_scale = 1.5
-			room.announce("ACCELERANDO", "", Pal.MARGIN)
+			fx.announce("ACCELERANDO", "", Pal.MARGIN)
 		"ghost_note":
 			var d := FX.Decoy.new()
 			d.dmg = dmg
 			d.info = info
 			d.kind = p.char_id
 			d.position = p.global_position
-			room.add_fx(d)
+			fx.add_fx(d)
 			room.decoy = d
 			Synth.sfx_play("spawn", -8.0)
 		_:
@@ -72,9 +74,9 @@ static func end_caesura(p: Player) -> void:
 	var r := FX.Ring.new()
 	r.radius = 210.0
 	r.dmg = 30.0
-	r.info = {"kind": "power", "aoe": true}
+	r.info = {"kind": "power", "power_id": "caesura", "aoe": true}
 	r.stun = 2.5
 	r.color = Pal.HUSH
 	r.position = p.global_position
-	p.room.add_fx(r)
+	p.fx.add_fx(r)
 	Synth.sfx_play("boom", -6.0)

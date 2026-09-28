@@ -20,12 +20,12 @@ func boss_setup() -> void:
 
 func _ready() -> void:
 	super._ready()
-	room.announce(ename, MOVEMENTS[1], Pal.PODIUM)
+	fx.announce(ename, MOVEMENTS[1], Pal.PODIUM)
 
 
 func on_phase(p: int) -> void:
-	room.announce(ename, MOVEMENTS[clampi(p, 1, 4)], Pal.PODIUM)
-	room.shake(10.0)
+	fx.announce(ename, MOVEMENTS[clampi(p, 1, 4)], Pal.PODIUM)
+	fx.shake(10.0)
 	Synth.sfx_play("crash", -2.0)
 	state = ""
 	if p == 4:
@@ -80,11 +80,11 @@ func ai_beat(n: int) -> void:
 			if b % 2 == 0:
 				column(p.global_position.x)
 				if phase >= 4:
-					column(p.global_position.x + randf_range(-300, 300))
+					column(p.global_position.x + Game.stream("combat").randf_range(-300, 300))
 				Synth.note("pluck", 53 + [0, 3, 7, 10][b], -6.0, false)
 			if b == 3:
-				var li := randi() % 3
-				line_strike(room.line_ys[li])
+				var li := Game.stream("combat").randi() % 3
+				line_strike(arena.line_ys[li])
 		3:
 			var to: Vector2 = (p.global_position - global_position).normalized()
 			for a in [-0.3, -0.1, 0.1, 0.3]:
@@ -95,7 +95,7 @@ func ai_beat(n: int) -> void:
 				_gust_t = Beat.beat_len() * 1.5
 				Synth.sfx_play("whoosh", -2.0, -6.0)
 	if phase >= 3 and n % 16 == 4:
-		summon(["quarter_rest", "eighth_rest", "tether_rest"][randi() % 3], 2, 3)
+		summon(["quarter_rest", "eighth_rest", "tether_rest"][Game.stream("combat").randi() % 3], 2, 3)
 
 
 func on_land() -> void:
@@ -104,7 +104,7 @@ func on_land() -> void:
 	state = ""
 	_enemy_shockwaves(dmg, 560.0, 1.6, 38.0)
 	Synth.sfx_play("boom", -2.0)
-	room.shake(9.0)
+	fx.shake(9.0)
 
 
 func _baton(p: Node) -> void:
@@ -115,21 +115,21 @@ func _baton(p: Node) -> void:
 	sl.color = Pal.BLOOD
 	sl.thick = 22.0
 	sl.position = global_position
-	room.add_fx(sl)
+	fx.add_fx(sl)
 	if absf(p.global_position.x - global_position.x) < 140.0 and absf(p.global_position.y - global_position.y) < 100.0:
-		p.take_hit(dmg * 1.2, global_position)
+		p.take_hit(dmg * 1.2, global_position, {"source": id})
 	Synth.sfx_play("whoosh", -2.0, 4.0)
 
 
 func _teleport() -> void:
 	var p = room.player
-	var side := 1.0 if p and p.global_position.x < room.width * 0.5 else -1.0
-	var x: float = room.width * 0.5 + side * randf_range(260, 480)
+	var side := 1.0 if p and p.global_position.x < arena.width * 0.5 else -1.0
+	var x: float = arena.width * 0.5 + side * Game.stream("combat").randf_range(260, 480)
 	var sp := FX.Splat.new()
 	sp.setup(20, 240.0, Pal.PODIUM)
 	sp.position = global_position
-	room.add_fx(sp)
-	global_position = Vector2(x, room.floor_y - r - 10.0)
+	fx.add_fx(sp)
+	global_position = Vector2(x, arena.floor_y - r - 10.0)
 	velocity = Vector2.ZERO
 	_blink = 0.3
 	Synth.sfx_play("spawn", -4.0)
@@ -139,12 +139,10 @@ func draw_body(col: Color) -> void:
 	if _blink > 0.0 and int(_blink * 30.0) % 2 == 0:
 		return
 	var ink := Pal.INK if col == Pal.INK else col
-	# A tailcoat in two strokes, a head like a whole note, a baton that never stops.
-	var coat := PackedVector2Array([Vector2(-r * 0.55, -r * 0.4), Vector2(r * 0.55, -r * 0.4), Vector2(r * 0.7, r * 0.7),
-		Vector2(r * 0.2, r * 0.5), Vector2(0, r), Vector2(-r * 0.2, r * 0.5), Vector2(-r * 0.7, r * 0.7)])
-	draw_colored_polygon(coat, ink)
-	draw_line(Vector2(0, -r * 0.4), Vector2(0, r * 0.4), Pal.PAPER, 2.0)
-	Glyph.whole_head(self, Vector2(0, -r * 0.95), r * 0.45, ink)
+	# A tailcoat and a head like a whole note (BossArt); the eye and the baton, which swings
+	# with the beat, stay in code.
+	if not _boss_body_sprite(col):
+		BossArt.conductor_body(self, r, col)
 	draw_circle(Vector2(facing * r * 0.15, -r * 1.0), 3.0, Pal.GOLD)
 	var sw := sin(t * TAU * Beat.bpm / 60.0 * 0.5) * 0.9
 	var hand := Vector2(facing * r * 0.6, -r * 0.3)

@@ -15,7 +15,7 @@ func _ready() -> void:
 		Synth.stop_song()
 		Synth.sfx_play("die", -2.0)
 	else:
-		Synth.start_song(Content.PAGES["grand" if v == "coda" else "ledger"].song)
+		Synth.start_song(Content.PAGES[ContentIds.PageIds.GRAND if v == "coda" else ContentIds.PageIds.LEDGER].song)
 		Synth.hush = 0.0
 
 
@@ -72,10 +72,11 @@ func _draw() -> void:
 	var reached: String = page_names[clampi(int(summary.get("page_i", 0)) + 1, 0, page_names.size() - 1)]
 	if v == "coda":
 		reached = "the Score itself"
-	var c := Content.character(summary.get("char", "quarter"))
+	var c := Content.character(summary.get("char", ContentIds.CharacterIds.QUARTER))
 	var st := "%s   ·   reached %s   ·   %d rests silenced   ·   %d rooms   ·   %d:%02d" % [c.name, reached, int(summary.get("kills", 0)), int(summary.get("rooms", 0)), secs / 60, secs % 60]
 	UI.text(self, Vector2(sz.x * 0.5, sz.y - 110), st, 17, Pal.INK, HORIZONTAL_ALIGNMENT_CENTER)
 	if v == "prima" and Game.meta.get("secret_wins", 0) == 0:
 		UI.text(self, Vector2(sz.x * 0.5, sz.y - 80), "(hint: read the margins)", 15, Pal.MARGIN, HORIZONTAL_ALIGNMENT_CENTER)
 	if _grace <= 0.0:
 		UI.text(self, Vector2(sz.x * 0.5, sz.y - 40), "back to the Margin", 15, Pal.INK_SOFT, HORIZONTAL_ALIGNMENT_CENTER)
+	UI.text(self, Vector2(sz.x - 24, sz.y - 16), BuildStamp.report_line(summary), 12, Pal.INK_SOFT, HORIZONTAL_ALIGNMENT_RIGHT)

@@ -9,6 +9,7 @@ var main: Node
 var game
 var frames := 0
 var visited: Array = []
+var ending_summary: Dictionary = {}
 
 
 func _initialize() -> void:
@@ -49,7 +50,10 @@ func _run() -> void:
 			continue
 		var script_path: String = cur.get_script().resource_path
 		if script_path.ends_with("ending.gd"):
-			print("[play] ENDING reached: '%s' after %d rooms, %d frames" % [cur.summary.get("victory", ""), visited.size(), frames])
+			# Game.end_run() resets Game.run to {} before showing this screen, so the real
+			# tallies only survive in the snapshot it hands the ending screen.
+			ending_summary = cur.summary
+			print("[play] ENDING reached: '%s' after %d rooms, %d frames" % [ending_summary.get("victory", ""), visited.size(), frames])
 			break
 		if script_path.ends_with("map_screen.gd"):
 			var ch_nodes: Array = cur.choices
@@ -65,14 +69,16 @@ func _run() -> void:
 		if cur.has_method("alive_enemies"):
 			await _play_room(cur)
 	print("[play] path: ", ", ".join(visited))
+	# ending_summary is the snapshot end_run() took before clearing Game.run; fall back to
+	# the live run if we stopped without ever reaching the ending screen.
+	var stats: Dictionary = ending_summary if not ending_summary.is_empty() else game.run
 	print("[play] kills %d, sharps %d, relics %d, runes %d, powers %s" % [
-		int(game.run.get("kills", 0)), int(game.run.get("sharps", 0)), game.run.get("relics", []).size(),
-		game.run.get("runes_owned", []).size(), str(game.run.get("powers", []))])
+		int(stats.get("kills", 0)), int(stats.get("sharps", 0)), stats.get("relics", []).size(),
+		stats.get("runes_owned", []).size(), str(stats.get("powers", []))])
 	quit()
 
 
 func _play_room(room) -> void:
-	_idle_t = 0
 	var t := 0
 	var n0: int = frames
 	var room_type: String = room.type
@@ -93,17 +99,10 @@ func _play_room(room) -> void:
 				for it in room.interactables:
 					if not it.used and it.kind in ["chest", "bench", "scribble"] and absf(it.global_position.x - p.global_position.x) < 50:
 						Input.action_press("interact")
-				# Head for the door. Climbs and arenas put it up on a platform; the bot tests
-				# the flow, not the platforming, so after a while it steps through.
-				var to_exit: Vector2 = room.exit_pos - p.global_position
-				Input.action_press("move_right" if to_exit.x >= 0.0 else "move_left")
-				if (p.is_on_wall() or to_exit.y < -60.0) and t % 20 == 0:
+				Input.action_press("move_right")
+				if p.is_on_wall() and t % 20 == 0:
 					Input.action_press("jump")
-				_idle_t += 1
-				if _idle_t > 60 * 6 and room.exit_open:
-					p.global_position = room.exit_pos + Vector2(0, -30)
 			elif es.size() > 0:
-				es.sort_custom(func(a, b): return a.global_position.distance_to(p.global_position) < b.global_position.distance_to(p.global_position))
 				var e = es[0]
 				var dx: float = e.global_position.x - p.global_position.x
 				if absf(dx) > 50:
@@ -117,23 +116,17 @@ func _play_room(room) -> void:
 				if t % 70 == 0:
 					Input.action_press("power2")
 				# Cheat a long fight along so the flow keeps moving.
-				# Tall rooms spread a wave over several staves, so the cheat hits them all.
 				if t > 60 * 40 and t % 30 == 0:
-					for o in es:
-						o.take_damage(o.max_hp * 0.1, {"kind": "cheat"})
+					e.take_damage(e.max_hp * 0.1, {"kind": "cheat"})
 		await _frames(1)
 	if t >= 60 * 150:
 		print("[play] room %s timed out" % room_type)
 		if is_instance_valid(room):
-			print("[play]   state=%s pending=%d wave=%d/%d player=%s" % [room.state, room.pending_spawns, room.wave_i + 1, room.waves.size(), room.player.global_position if room.player else "none"])
+			print("[play]   state=%s pending=%d wave=%d/%d player=%s" % [room.state, room.enemy_roster.pending_spawns, room.wave_i + 1, room.waves.size(), room.player.global_position if room.player else "none"])
 			for e in room.alive_enemies():
 				print("[play]   left: %s ai=%s at %s state=%s aggro=%s" % [e.id, e.ai, e.global_position.round(), e.state, e.aggro])
 	else:
 		print("[play] %s done in %.1fs" % [room_type, (frames - n0) / 60.0])
-
-
-## Frames spent heading for the exit in the current room.
-var _idle_t := 0
 
 
 func _frames(n: int) -> void:

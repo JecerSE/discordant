@@ -43,6 +43,16 @@ One global clock (`Beat`) drives the music, every enemy action and every boss pa
 - Every enemy winds up on one beat (a red accent mark `>` appears) and strikes on the next.
 - Beat judgement compensates for audio output latency. There is also a manual offset in Settings.
 
+**Timing note:** `Beat` and every menu/dialogue/choice overlay's input now tick on the physics
+step (a fixed 60 Hz), not the render frame. This was a determinism fix for headless sweeps
+(a run's timing used to depend on incidental render-frame timing, so replaying the same seed
+could disagree with itself), but it changes real play too: beat judgement and menu input no
+longer depend even slightly on your framerate or vsync. Measured with a real window at 60 fps,
+144 fps and uncapped/vsync-off: the beat clock advances at exactly the same rate (60 physics
+ticks per real second) in all three, where before it would have tracked the render rate
+instead. Menus, sliders and rebinding were re-checked the same way and take input the same as
+before - this is a precision fix, not a feature change.
+
 ## Powers: the four types
 
 Two slots (a third with the *Double Bar* rune), levels I–III (rehearse at a fermata).

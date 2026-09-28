@@ -11,28 +11,17 @@ var node_idx := -1
 var page_id := "ledger"
 var family := "ledger"
 var width := 1920.0
-var height := 720.0
 var floor_y := 660.0
-## Every level's y, bottom first: staff lines, plus two ledger levels between staves.
 var line_ys: Array = [550.0, 440.0, 330.0, 220.0, 110.0]
-## Stacked staves (RoomShape.configure_levels) and the room's shape (RoomShape).
-var systems := 1
-var shape := "corridor"
-var spawn_pos := Vector2(90, 620)
-## The exit door's foot, the area that leaves the room, and whether the door stays
-## hidden until the room is cleared (arenas). exit_pop grows the door in (0 to 1).
-var exit_pos := Vector2.ZERO
-var exit_rect := Rect2()
-var exit_hidden := false
-var exit_pop := 0.0
-## Seconds since the room opened, for the platforms inking in (PlatformInk).
-var ink_t := 0.0
 var segments: Array = []
 var features: Array = []
 
 var player: Player
-var enemies: Array = []
-var boss_node: Node
+@export var enemy_roster: EnemyRoster = EnemyRoster.new()
+@export var reward_flow: RewardFlow = RewardFlow.new()
+@export var arena: Arena = Arena.new()
+@export var fx: RoomFx = RoomFx.new()
+@export var fight: FightState = FightState.new()
 var decoy: Node
 var frozen := false
 var fermata_t := 0.0
@@ -40,14 +29,12 @@ var enemy_speed_scale := 1.0
 
 var waves: Array = []
 var wave_i := -1
-var pending_spawns := 0
 var state := "enter"
 var hushed := false
 var wash := 0.0
 var hush_visual := 0.0
 var has_exit := true
 var exit_open := false
-var elite_drop := ""
 var cam: Camera2D
 var shake_amt := 0.0
 var rng := RandomNumberGenerator.new()
@@ -66,8 +53,6 @@ var _bg: Node2D
 
 
 var damage_numbers := DamageNumbers.new()
-## Most enemies alive or arriving at once this room, for the music muffle.
-var hush_peak := 0
 const MUSIC_TUNING: MusicTuning = preload("res://content/tuning/music_tuning.tres")
 
 
@@ -82,15 +67,13 @@ func _build_geometry() -> void:
 	solid.collision_mask = 0
 	add_child(solid)
 	_add_rect(solid, Rect2(-100, floor_y, width + 200, 300))
-	_add_rect(solid, Rect2(-100, -400, 100, height + 700))
-	_add_rect(solid, Rect2(width, -400, 100, height + 700))
+	_add_rect(solid, Rect2(-100, -400, 100, 1400))
+	_add_rect(solid, Rect2(width, -400, 100, 1400))
 	_add_rect(solid, Rect2(-100, -400, width + 200, 400 + 30))
-	PlatformInk.schedule(segments, spawn_pos)
 	for s in segments:
 		var body := StaticBody2D.new()
-		body.collision_layer = PlatformInk.start_layer(s)
+		body.collision_layer = 2
 		body.collision_mask = 0
-		s.body = body
 		add_child(body)
 		var cs := CollisionShape2D.new()
 		var rs := RectangleShape2D.new()
@@ -125,11 +108,13 @@ func combat_active() -> bool:
 
 func add_fx(n: Node) -> void:
 	n.set("room", self)
+	n.set("enemy_roster", enemy_roster)
 	_layer_fx.add_child(n)
 
 
 func add_projectile(p: Node) -> void:
 	p.room = self
+	p.enemy_roster = enemy_roster
 	_layer_proj.add_child(p)
 
 
@@ -197,6 +182,7 @@ func open_overlay(o: Node) -> void:
 		overlay.queue_free()
 	overlay = o
 	o.set("room", self)
+	o.set("enemy_roster", enemy_roster)
 	get_tree().paused = true
 	hud.add_child(o)
 	o.tree_exited.connect(func():
@@ -210,6 +196,10 @@ func open_overlay(o: Node) -> void:
 func offer(title: String, subtitle: String, ids: Array, cb: Callable, allow_skip := true, prices := {}) -> void:
 	if ids.is_empty():
 		return
+	if Game.has_run():
+		for id in ids:
+			if not Game.run.offered.has(id):
+				Game.run.offered.append(id)
 	var c = preload("res://src/ui/choice.gd").new()
 	c.title = title
 	c.subtitle = subtitle

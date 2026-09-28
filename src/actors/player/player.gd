@@ -24,18 +24,29 @@ func _draw() -> void:
 		alpha = 0.3
 	col = Color(col, alpha)
 
-	# The body and afterimages are drawn by PlayerAnimator (pixel sprites). Vector
-	# drawing stays as a fallback for a character without a sheet.
-	if animator == null or not animator.has_sheet():
-		for a in afterimages:
-			Glyph.note(self, kind, to_local(a.p), facing, size, Color(Pal.GOLD if dash_on_beat else Pal.INK, a.a * 0.35))
-		var stem := -velocity.x * 0.0006 * facing
-		if swing_t > 0.0:
-			stem = lerpf(-0.5, 1.5, 1.0 - swing_t / swing_len)
-		var sq := squash
-		draw_set_transform(Vector2(0, size * (1.0 - sq)), 0.0, Vector2(1.0 / sq, sq))
+	for a in afterimages:
+		Glyph.note(self, kind, to_local(a.p), facing, size, Color(Pal.GOLD if dash_on_beat else Pal.INK, a.a * 0.35))
+
+	var stem := -velocity.x * 0.0006 * facing
+	if swing_t > 0.0:
+		var k := 1.0 - swing_t / swing_len
+		stem = lerpf(-0.5, 1.5, k)
+	var sq := squash
+	var sx := 1.0 / sq
+	draw_set_transform(Vector2(0, size * (1.0 - sq)), 0.0, Vector2(sx, sq))
+	var head := RenderAdapter.sprite("player_%s_head" % kind) if RenderAdapter.is_on("player_" + kind) else null
+	if head:
+		# Pixel-art head (PlayerArt) between the code-drawn stem and eyes.
+		Glyph.note(self, kind, Vector2.ZERO, facing, size, col, stem, sq, Pal.PAPER, blink_t < 0.0, Glyph.NOTE_STEM)
+		var k := Vector2.ONE * size / PlayerArt.base_size(kind)
+		RenderAdapter.draw_art(self, head, Vector2.ZERO, k, col)
+		var paper := RenderAdapter.sprite("player_%s_head_paper" % kind)
+		if paper:
+			RenderAdapter.draw_art(self, paper, Vector2.ZERO, k)
+		Glyph.note(self, kind, Vector2.ZERO, facing, size, col, stem, sq, Pal.PAPER, blink_t < 0.0, Glyph.NOTE_EYES)
+	else:
 		Glyph.note(self, kind, Vector2.ZERO, facing, size, col, stem, sq, Pal.PAPER, blink_t < 0.0)
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 	for i in marks:
 		draw_circle(Vector2(-10 + i * 10, -size * 4.2), 4.0, Pal.STRING)

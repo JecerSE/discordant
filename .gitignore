@@ -1,4 +1,6 @@
 .godot/
 export/
 build/
-__pycache__/
+# tools/sweep.gd output - local test data, never committed
+results/
+dist/

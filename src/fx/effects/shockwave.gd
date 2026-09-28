@@ -8,6 +8,7 @@ var team := "player"
 var color := Pal.INK
 var height := 34.0
 var info := {}
+var source_id := ""          # the enemy id that sent this, for damage-taken attribution
 var _hit := {}
 
 func _init() -> void:
@@ -19,7 +20,7 @@ func tick(delta: float) -> void:
 		queue_free()
 		return
 	if team == "player":
-		for e in room.alive_enemies():
+		for e in enemy_roster.alive_enemies():
 			if _hit.has(e.get_instance_id()):
 				continue
 			if absf(e.global_position.x - global_position.x) < 30.0 + e.r and absf(e.feet_y() - global_position.y) < height + 8.0:
@@ -32,7 +33,7 @@ func tick(delta: float) -> void:
 		var p = room.player
 		if p and not _hit.has(0) and absf(p.global_position.x - global_position.x) < 26.0 and absf(p.feet_y() - global_position.y) < height * 0.7:
 			_hit[0] = true
-			p.take_hit(dmg, global_position - Vector2(dir * 40.0, 0))
+			p.take_hit(dmg, global_position - Vector2(dir * 40.0, 0), {"source": source_id})
 
 func _draw() -> void:
 	var k := 1.0 - t / life

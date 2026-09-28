@@ -7,10 +7,11 @@ var color := Pal.INK
 func setup(count: int, force: float, col: Color) -> void:
 	color = col
 	life = 0.6
+	var cr := Game.stream("cosmetic")
 	for i in count:
-		var a := randf() * TAU
-		var v := Vector2(cos(a), sin(a) - 0.6) * randf_range(force * 0.3, force)
-		drops.append({"p": Vector2.ZERO, "v": v, "r": randf_range(2.0, 5.5)})
+		var a := cr.randf() * TAU
+		var v := Vector2(cos(a), sin(a) - 0.6) * cr.randf_range(force * 0.3, force)
+		drops.append({"p": Vector2.ZERO, "v": v, "r": cr.randf_range(2.0, 5.5)})
 
 func tick(delta: float) -> void:
 	for d in drops:

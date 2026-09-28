@@ -1,5 +1,5 @@
 class_name StoryData
-## Teachers, the Margin intro and the endings. The prologue is a cutscene: IntroData.
+## Teachers, the Margin intro, the prologue and the endings.
 ## Split from the original content.gd without changing any values.
 
 const TEACHERS := {
@@ -42,6 +42,17 @@ const MARGIN_INTRO := [
 	"Something really is eating the music. You'll hear it, everything goes muffled and grey. It looks like us. I don't think it is us.",
 	"The Winds hate us the most. The Strings used to play with us. Percussion just wants everyone on the downbeat.",
 	"If you're climbing back up, read the margins. Nobody ever does.",
+]
+
+const PROLOGUE := [
+	"There is a Score.",
+	"The Grand Score holds every song there is. Every note lives on it, sheet after sheet.",
+	"Every note has a bar, a beat, and a purpose.",
+	"The Conductor writes it all. The Conductor has never noticed that the notes are alive.",
+	"You were a quarter note. One beat.",
+	"Then you were struck out and thrown off the staff, down into the Margin, where erased notes end up.",
+	"Up above, the music is going quiet. The Rest is spreading through the pages.",
+	"The only way back is up.",
 ]
 
 const ENDINGS := {

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SeasonParticles" format=3]
+
+[ext_resource type="Script" path="res://src/art/season_particles.gd" id="1_w4xyp"]
+
+[resource]
+script = ExtResource("1_w4xyp")
+sprite_key = "season_heat_shimmer"
+per_1000px = 18.0
+velocity = Vector2(0, -14)
+sway = 6.0
+sway_rate = 2.5
+pulse_rate = 1.7
+scale_min = 1.2
+scale_max = 2.0
+alpha = 0.6

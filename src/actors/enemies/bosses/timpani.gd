@@ -56,33 +56,17 @@ func on_land() -> void:
 	_enemy_ring(TIMPANI_TUNING.landing_ring_radius, dmg, Pal.PERCUSSION)
 	Synth.sfx_play("boom", 0.0)
 	Synth.sfx_play("kick", 0.0)
-	room.shake(12.0)
+	fx.shake(12.0)
 
 
 func draw_body(col: Color) -> void:
-	var body := Pal.PERCUSSION.lerp(Pal.PAPER_DARK, 0.4)
-	if col != Pal.INK:
-		body = body.lerp(col, 0.4)
-	# The kettle.
-	var pts := PackedVector2Array()
-	for i in 17:
-		var a := PI * i / 16.0
-		pts.append(Vector2(cos(a) * r * 1.1, -r * 0.1 + sin(a) * r * 0.95))
-	draw_colored_polygon(pts, body)
-	pts.append(pts[0])
-	draw_polyline(pts, Pal.INK, 4.0, true)
-	# The skin, and a face in it.
-	Glyph.fill_ellipse(self, Vector2(0, -r * 0.1), r * 1.1, r * 0.3, 0.0, Pal.PAPER)
-	Glyph.ring_ellipse(self, Vector2(0, -r * 0.1), r * 1.1, r * 0.3, 0.0, Pal.INK, 4.0)
+	# The kettle and its skin (BossArt), a face in it, then rods and legs over the face.
+	if not _boss_body_sprite(col):
+		BossArt.timpani_body(self, r, col)
 	var ex := facing * r * 0.15
 	for s in [-1.0, 1.0]:
 		draw_line(Vector2(ex + s * r * 0.45, -r * 0.24), Vector2(ex + s * r * 0.2, -r * 0.14), Pal.INK, 4.0)
 		draw_circle(Vector2(ex + s * r * 0.3, -r * 0.08), 5.0, Pal.BLOOD)
-	# Tension rods.
-	for i in 5:
-		var x := -r * 0.9 + i * r * 0.45
-		draw_line(Vector2(x, -r * 0.05), Vector2(x * 0.9, r * 0.55), Color(Pal.INK, 0.6), 2.5)
-	# Legs.
-	draw_line(Vector2(-r * 0.6, r * 0.7), Vector2(-r * 0.8, r), Pal.INK, 4.0)
-	draw_line(Vector2(r * 0.6, r * 0.7), Vector2(r * 0.8, r), Pal.INK, 4.0)
+	if not _boss_layer_sprite("boss_timpani_front"):
+		BossArt.timpani_front(self, r)
 	draw_circle(Vector2(0, r * 0.2), r * 1.2, Color(Pal.HUSH, 0.08))

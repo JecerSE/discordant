@@ -58,16 +58,15 @@ static func try_cast(p: Player, slot: int) -> void:
 	var ok := cast(p, id, dmg, lvl)
 	if ok and id != "breath_charge":
 		p.cds[slot] = cooldown_of(id, lvl)
-		p.room.on_power_used(id)
+		p.reward_flow.on_power_used(id)
 	elif ok:
 		p.charging = slot
 		p.charge = 0.0
 
 
 static func cast(p: Player, id: String, dmg: float, lvl: int) -> bool:
-	var room = p.room
-	var info := {"kind": "power", "on_beat": p._judge_beat(), "grade": p.last_grade}
-	room.grade_feedback(p.global_position + Vector2(0, -p.size * 3.5), p.last_grade)
+	var info := {"kind": "power", "power_id": id, "on_beat": p._judge_beat(), "grade": p.last_grade}
+	p.fx.grade_feedback(p.global_position + Vector2(0, -p.size * 3.5), p.last_grade)
 	match Content.POWERS[id].family:
 		"percussion":
 			return PercussionPowers.cast(p, id, dmg, lvl, info)
@@ -89,7 +88,8 @@ static func end_caesura(p: Player) -> void:
 	RestPowers.end_caesura(p)
 
 
-static func spawn_shockwaves(p: Player, dmg: float, on_beat := false) -> void:
+## power_id: set when this IS the shockwave power cast, not the Mallet Shock rune proc.
+static func spawn_shockwaves(p: Player, dmg: float, on_beat := false, power_id := "") -> void:
 	var big := Game.flag("big_waves")
 	for d in [-1.0, 1.0]:
 		var w := FX.Shockwave.new()
@@ -97,18 +97,22 @@ static func spawn_shockwaves(p: Player, dmg: float, on_beat := false) -> void:
 		w.dmg = dmg * (1.0 + big * 0.5)
 		w.height *= 1.0 + big
 		w.info = {"kind": "power", "on_beat": on_beat, "aoe": true}
+		if power_id != "":
+			w.info["power_id"] = power_id
 		if Game.flag("prepared_piano") > 0.0:
 			fire_wave_dir(p, Vector2(d, 0), dmg * 0.5, 0.8, false)
 		w.color = Pal.PERCUSSION
 		w.position = Vector2(p.global_position.x, p.feet_y())
-		p.room.add_fx(w)
+		p.fx.add_fx(w)
 
 
-static func fire_wave(p: Player, dmg: float, scale := 1.0, sound := true, on_beat := false) -> void:
-	fire_wave_dir(p, Vector2(p.facing, 0), dmg, scale, sound, on_beat)
+## power_id: set when this wave IS a power cast (soundwave), not a rune proc (Pizzicato,
+## Hurdy-Gurdy, ...), so damage-dealt tracking can attribute it correctly.
+static func fire_wave(p: Player, dmg: float, scale := 1.0, sound := true, on_beat := false, power_id := "") -> void:
+	fire_wave_dir(p, Vector2(p.facing, 0), dmg, scale, sound, on_beat, power_id)
 
 
-static func fire_wave_dir(p: Player, dir: Vector2, dmg: float, scale := 1.0, sound := true, on_beat := false) -> void:
+static func fire_wave_dir(p: Player, dir: Vector2, dmg: float, scale := 1.0, sound := true, on_beat := false, power_id := "") -> void:
 	var w := Projectile.new()
 	w.team = "player"
 	w.style = "wave"
@@ -119,9 +123,11 @@ static func fire_wave_dir(p: Player, dir: Vector2, dmg: float, scale := 1.0, sou
 	w.life = 1.1
 	w.pierce = 2 + int(Game.stats().pierce)
 	w.info = {"kind": "proj", "on_beat": on_beat}
+	if power_id != "":
+		w.info["power_id"] = power_id
 	if Game.flag("aeolian") > 0.0:
 		w.info["shove"] = true
 	w.position = p.global_position + dir.normalized() * 20.0
-	p.room.add_projectile(w)
+	p.fx.add_projectile(w)
 	if sound:
 		Synth.sfx_play("zap", -8.0, 2.0)

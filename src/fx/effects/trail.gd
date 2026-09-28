@@ -12,7 +12,7 @@ func _init() -> void:
 
 func tick(_delta: float) -> void:
 	var rect := Rect2(Vector2(minf(a.x, b.x), minf(a.y, b.y) - 20.0), Vector2(absf(b.x - a.x), absf(b.y - a.y) + 40.0))
-	for e in room.alive_enemies():
+	for e in enemy_roster.alive_enemies():
 		if _hit.has(e.get_instance_id()):
 			continue
 		if rect.grow(e.r).has_point(e.global_position):

@@ -21,9 +21,6 @@ func _ready() -> void:
 	hp = clampf(float(Game.run.get("hp", max_hp)), 1.0, max_hp)
 	jumps_left = int(Game.stats().jumps)
 	Beat.bar.connect(_on_bar)
-	animator = PlayerAnimator.new()
-	animator.player = self as Player
-	add_child(animator)
 	Beat.beat.connect(_on_beat)
 
 
@@ -100,7 +97,7 @@ func _physics_process(delta: float) -> void:
 			var sp := FX.Splat.new()
 			sp.setup(6, 160.0, Pal.INK_SOFT)
 			sp.position = global_position + Vector2(0, size)
-			room.add_fx(sp)
+			fx.add_fx(sp)
 	if controllable and Input.is_action_just_released("jump") and velocity.y < -200.0 and updraft_t <= 0.0:
 		velocity.y *= 0.5
 
@@ -124,7 +121,7 @@ func _physics_process(delta: float) -> void:
 			drumroll_n -= 1
 			swing_t = 0.12
 			swing_len = 0.12
-			_melee_rect(Vector2(40, -4), Vector2(96, 64), drumroll_dmg, Vector2(90, -60), true, {"kind": "power"})
+			_melee_rect(Vector2(40, -4), Vector2(96, 64), drumroll_dmg, Vector2(90, -60), true, {"kind": "power", "power_id": "drumroll"})
 			_slash(52.0, Pal.PERCUSSION)
 			Synth.sfx_play("tom", -6.0, 3.0)
 
@@ -157,7 +154,7 @@ func _timers(delta: float) -> void:
 		if marks_t <= 0.0:
 			marks = 0
 	if blink_t < -0.12:
-		blink_t = randf_range(1.5, 4.0)
+		blink_t = Game.stream("cosmetic").randf_range(1.5, 4.0)
 	if combo_t <= 0.0:
 		combo = 0
 	squash = move_toward(squash, 1.0, delta * 4.0)
@@ -240,7 +237,7 @@ func _land() -> void:
 	if diving != "":
 		var d := diving
 		diving = ""
-		room.shake(9.0)
+		fx.shake(9.0)
 		Synth.sfx_play("boom", -4.0)
 		if d == "shock":
 			Powers.spawn_shockwaves(self as Player, dive_dmg)
@@ -254,7 +251,7 @@ func _land() -> void:
 			r.stun = 0.4
 			r.knock = 500.0
 			r.position = global_position + Vector2(0, size)
-			room.add_fx(r)
+			fx.add_fx(r)
 	if Game.flag("land_shock") > 0.0 and fall > 180.0:
 		Powers.spawn_shockwaves(self as Player, 14.0)
 
@@ -286,4 +283,4 @@ func _beat_puff() -> void:
 	r.radius = 26.0
 	r.color = Pal.GOLD
 	r.position = global_position + Vector2(0, size)
-	room.add_fx(r)
+	fx.add_fx(r)

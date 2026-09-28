@@ -64,10 +64,10 @@ func _run(id: String) -> void:
 			if has_run and not pool.is_empty():
 				Events.learn(room, pool[randi() % pool.size()])
 		"kill", "clear":
-			for e in room.alive_enemies():
+			for e in enemy_roster.alive_enemies():
 				e.die()
 			if id == "clear":
-				room.pending_spawns = 0
+				enemy_roster.pending_spawns = 0
 				room.wave_i = room.waves.size()
 		"clefs":
 			if has_run:

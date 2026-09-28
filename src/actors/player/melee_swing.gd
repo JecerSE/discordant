@@ -8,6 +8,8 @@ signal struck(enemy: Node, damage: float, info: Dictionary)
 signal landed_first_hit
 
 var room: Node
+var enemy_roster: EnemyRoster
+var reward_flow: RewardFlow
 var step: AttackStep
 var facing := 1.0
 var damage := 0.0
@@ -18,8 +20,10 @@ var _announced_strike := false
 var _landed := false
 
 
-func setup(p_room: Node, p_step: AttackStep, p_facing: float, p_damage: float, p_info: Dictionary) -> void:
+func setup(p_room: Node, p_roster: EnemyRoster, p_reward_flow: RewardFlow, p_step: AttackStep, p_facing: float, p_damage: float, p_info: Dictionary) -> void:
 	room = p_room
+	enemy_roster = p_roster
+	reward_flow = p_reward_flow
 	step = p_step
 	facing = p_facing
 	damage = p_damage
@@ -27,7 +31,7 @@ func setup(p_room: Node, p_step: AttackStep, p_facing: float, p_damage: float, p
 
 
 func _ready() -> void:
-	assert(room != null and step != null, "MeleeSwing.setup() must run before adding it")
+	assert(room != null and enemy_roster != null and reward_flow != null and step != null, "MeleeSwing.setup() must run before adding it")
 	_add_visual()
 
 
@@ -37,8 +41,8 @@ func _physics_process(delta: float) -> void:
 	var bounds := _bounds(center)
 	if not _announced_strike:
 		_announced_strike = true
-		room.on_player_strike(bounds, info.get("on_beat", false))
-	for e in room.alive_enemies():
+		reward_flow.on_player_strike(bounds, info.get("on_beat", false))
+	for e in enemy_roster.alive_enemies():
 		var id: int = e.get_instance_id()
 		if _hit.has(id) or not _overlaps(center, bounds, e):
 			continue

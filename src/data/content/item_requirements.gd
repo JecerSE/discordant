@@ -5,19 +5,19 @@ class_name ItemRequirements
 
 ## Each requirement is met by any one of its powers, items, or characters.
 const SOURCES := {
-	"parry": {"powers": ["parry"], "items": [], "chars": []},
-	"shield": {"powers": ["reverb_shield"], "items": [], "chars": ["half"]},
-	"projectile": {"powers": ["soundwave"], "items": ["pizzicato", "violist_bow", "hurdy_gurdy"], "chars": []},
-	"waves": {"powers": ["shockwave"], "items": ["timpanist_mallet", "cymbal", "cymbal_shard"], "chars": ["whole"]},
+	"parry": {"powers": [ContentIds.PowerIds.PARRY], "items": [], "chars": []},
+	"shield": {"powers": [ContentIds.PowerIds.REVERB_SHIELD], "items": [], "chars": [ContentIds.CharacterIds.HALF]},
+	"projectile": {"powers": [ContentIds.PowerIds.SOUNDWAVE], "items": [ContentIds.RuneIds.PIZZICATO, ContentIds.RelicIds.VIOLIST_BOW, ContentIds.RuneIds.HURDY_GURDY], "chars": []},
+	"waves": {"powers": [ContentIds.PowerIds.SHOCKWAVE], "items": [ContentIds.RelicIds.TIMPANIST_MALLET, ContentIds.RuneIds.CYMBAL, ContentIds.RelicIds.CYMBAL_SHARD], "chars": [ContentIds.CharacterIds.WHOLE]},
 }
 
 ## item id -> requirement name
 const REQUIRES := {
-	"snare": "parry",
-	"whole_rest_rune": "parry",
-	"harmonic": "shield",
-	"bow": "projectile",
-	"timpani_rune": "waves",
+	ContentIds.RuneIds.SNARE: "parry",
+	ContentIds.RuneIds.WHOLE_REST_RUNE: "parry",
+	ContentIds.RuneIds.HARMONIC: "shield",
+	ContentIds.RuneIds.BOW: "projectile",
+	ContentIds.RuneIds.TIMPANI_RUNE: "waves",
 }
 
 const NEEDS_TEXT := {

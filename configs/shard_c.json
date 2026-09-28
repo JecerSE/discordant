@@ -1,0 +1,106 @@
+{
+  "id": "shard_c",
+  "note": "Planned config. sweep.gd does not read item_policy, variants, force_items or force_runes yet, so the total is under planned_runs (not runs) and the current sweep.gd runs nothing from this file. Rename planned_runs to runs once sweep.gd supports every key in requires.",
+  "requires": [
+    "item_policy",
+    "variants",
+    "force_runes"
+  ],
+  "planned_runs": 400,
+  "characters": [
+    "quarter",
+    "whole",
+    "half",
+    "eighth"
+  ],
+  "base_seed": 300000,
+  "clefs": false,
+  "item_policy": "random",
+  "paired_seeds": true,
+  "variants": [
+    {
+      "label": "percussion_2",
+      "force_runes": [
+        "bass_drum",
+        "cymbal"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "percussion_3",
+      "force_runes": [
+        "bass_drum",
+        "cymbal",
+        "snare"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "wind_2",
+      "force_runes": [
+        "piccolo",
+        "reed"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "wind_3",
+      "force_runes": [
+        "piccolo",
+        "reed",
+        "horn"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "string_2",
+      "force_runes": [
+        "pizzicato",
+        "bow"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "string_3",
+      "force_runes": [
+        "pizzicato",
+        "bow",
+        "harmonic"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "thunderclap",
+      "force_runes": [
+        "bass_drum",
+        "piccolo"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "aeolian_harp",
+      "force_runes": [
+        "piccolo",
+        "bow"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "prepared_piano",
+      "force_runes": [
+        "bow",
+        "bass_drum"
+      ],
+      "runs": 40
+    },
+    {
+      "label": "cacophony",
+      "force_runes": [
+        "bass_drum",
+        "piccolo",
+        "bow"
+      ],
+      "runs": 40
+    }
+  ]
+}

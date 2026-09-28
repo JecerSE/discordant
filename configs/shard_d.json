@@ -1,0 +1,17 @@
+{
+  "id": "shard_d",
+  "note": "Planned config. sweep.gd does not read item_policy, variants, force_items or force_runes yet, so the total is under planned_runs (not runs) and the current sweep.gd runs nothing from this file. Rename planned_runs to runs once sweep.gd supports every key in requires.",
+  "requires": [
+    "item_policy"
+  ],
+  "planned_runs": 300,
+  "characters": [
+    "quarter",
+    "whole",
+    "half",
+    "eighth"
+  ],
+  "base_seed": 400000,
+  "clefs": false,
+  "item_policy": "greedy_damage"
+}

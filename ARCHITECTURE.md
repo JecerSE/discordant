@@ -6,6 +6,8 @@ This document has three parts. Part 1 audits the v1.0 prototype. Part 2 sets the
 
 > **File paths changed after this audit.** The code was split into files under 300 lines on 2026-09-25 without behavior changes. `docs/FILE_MAP.md` maps every path and line count below to its new location.
 
+> **Untyped back-references cut from 313 to 34, on 2026-09-28, without behavior changes** (Task 6, four steps, each merged separately): typed content ids for characters, powers, runes, relics, enemies and pages; `EnemyRoster` (a room's enemy list — alive enemies, the boss, pending spawns); `RewardFlow` (enemy deaths, clears, boss defeats, death, leaving, and the rewards that follow); and `Arena` + `RoomFx` + `FightState` (geometry; fx/text/shake/announce; frozen/active/enemy-speed/hush/decoy). Player and Enemy hold each of these typed, instead of reaching through `var room: Node`. The remaining 34 calls, and why each stays, are recorded in the "Untyped back-references" row below and in the project's known-gaps notes.
+
 This audit covers the v1.0 prototype (release v1.0, 2026-09-24): Godot 4.7.2, GDScript, GL Compatibility renderer. It documents what the code does today, so it can be rebuilt properly. The prototype is a disposable reference implementation and is not refactored in place.
 
 **Summary for the rebuild**
@@ -421,13 +423,38 @@ There are 38 flag names read through `Game.flag()`, all string literals checked 
 | Problem | Where | Effect |
 | --- | --- | --- |
 | God object | `Room` | Actors, FX, UI and events all call into it. It owns geometry, waves, loot rewards, overlays, the fermata, features, the camera and the HUD. |
-| Untyped back-references | `var room: Node` on Player, Enemy, Projectile, FX, Interactable, overlays | No static checking on 313 calls; errors appear only at runtime. |
-| Private calls across classes | `Powers` calls `p._judge_beat`, `p._start_dash`, `p._slash`; `Boss.summon` calls `room._telegraph_spawn` | Leading-underscore methods act as a public API. |
+| Untyped back-references | `var room: Node` on Player, Enemy, Projectile, FX, Interactable, overlays | Was 313 calls with no static checking; Task 6 (below) moved Player and Enemy's own use of it onto `enemy_roster`, `reward_flow`, `arena`, `fx` and `fight`, cutting their direct `room.` calls to 34. Projectile, FX, Interactable and overlays are unchanged and still untyped. |
+| Private calls across classes | `Powers` calls `p._judge_beat`, `p._start_dash`, `p._slash`; `Boss.summon` calls `room._telegraph_spawn` | Leading-underscore methods act as a public API. `Boss.summon`'s call is also one of the 34 remaining `room.` calls (see Task 6 below): it's a private cross-class call, not a case of Enemy reading a room property, so it didn't fit the typed-reference extraction. |
 | Monolithic player | `player.gd` (923 lines) | Movement, 4 characters' attacks, `deal()` with about 20 rune hooks, `take_hit`, powers state, drawing. |
 | Monolithic enemy | `enemy.gd` (962 lines) | 24 behaviors in two `match` blocks (per-frame and per-beat), with shared fields that only some behaviors use (`stance`, `invis`, `barrier`, `dash_dir`, `_tether_tick`). |
 | Static data class | `Content` | All tuning is in code constants. Designers can't edit it in the inspector (issue #29). |
 | Global run state as a Dictionary | `Game.run`, `Game.meta`, `Game.settings` | No schema; keys are added ad hoc (`grand`, `preview`). |
 | Drawing in logic classes | `_draw()` on Player, Enemy, Room, Background, Interactable | Art is code. Replacing it with sprites or animations means rewriting every draw function. |
+
+### Task 6: typed references instead of `var room: Node` (closed 2026-09-28)
+
+Four extractions, each on its own branch, merged in order:
+
+1. Typed content ids for characters, powers, runes, relics, enemies and pages.
+2. `EnemyRoster` — a room's enemy list: alive enemies, the boss, pending spawns.
+3. `RewardFlow` — enemy deaths, clears, boss defeats, death, leaving the room, and the rewards that follow.
+4. `Arena` (width, floor_y, line_ys, segments, `ground_below`), `RoomFx` (add_fx, add_projectile, add_line_fx, float_text, show_damage, shake, hurt_flash, announce, grade_feedback) and `FightState` (frozen, combat_active, enemy_speed_scale, base_hush, decoy, start_fermata).
+
+Each of steps 2-4 follows the same shape: Room owns the collaborator and wires it (sets its `room` back-reference, hands the typed reference to Player/Enemy at spawn and at respawn); Player and Enemy hold the typed reference directly instead of reaching through `room.`.
+
+Direct `room.` calls in Player's and Enemy's own files: 313 before step 2, 34 after step 4. The 34 that remain, and why:
+
+| What | Count | Why it stays untyped |
+| --- | --- | --- |
+| `room.player` | 30 | The Player node is reassigned at runtime (`RewardFlow.respawn_player` creates a new `Player` and replaces `room.player`). A cached copy on every living Enemy would go stale until re-synced on every respawn — a real behavior-preserving concern, not a mechanical extraction. This is the blocker for a possible step 5. |
+| `room.enemy_speed_scale =` (write) | 2 | Two write sites only (Player's Accelerando and Rest power). `FightState.enemy_speed_scale()` is a read-only wrapper; adding a setter is cheap but wasn't part of this step's diff. |
+| `room.decoy =` (write) | 1 | Same reasoning: Room owns the mutable field, `FightState.decoy()` only exposes the read. |
+| `room._telegraph_spawn` | 1 | A private cross-class call from `Boss.summon` into Room's spawn internals (also listed under "Private calls across classes" above). It's Boss calling a private method, not Enemy reading a room property, so it doesn't fit the typed-reference pattern. |
+
+**Backlog (not scoped, not started): a possible step 5.** Its shape, as noted above:
+- Either add a live-read getter for the player (e.g. on `FightState` or `EnemyRoster`) that always reads the current `room.player`, or re-sync a cached `Player` reference on every living Enemy when `RewardFlow.respawn_player` runs. Either removes the 30 `room.player` calls, but changes a currently-safe-by-construction path, so it needs its own care and its own suite run.
+- Add setters to `FightState` for `enemy_speed_scale` and `decoy`, removing the 3 write-site calls.
+- Decide whether `Boss.summon`'s call into `room._telegraph_spawn` gets a proper typed entry point (e.g. on `EnemyRoster` or a boss-specific collaborator) or stays as documented, deliberate private-API coupling.
 
 ### Fragile logic and known bugs
 

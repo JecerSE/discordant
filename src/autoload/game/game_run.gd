@@ -38,12 +38,36 @@ func _fresh_run(char_id: String) -> void:
 		"kills": 0,
 		"rooms": 0,
 		"started": Time.get_ticks_msec(),
+		"started_frame": Engine.get_physics_frames(),
 		"seed": randi(),
+		# Telemetry for tools/sweep.gd. dmg_dealt/dmg_taken are totals by source key
+		# ("melee", "proj", "power:<id>" dealt; an enemy id, or "environment", taken).
+		# dmg_log is [[t_sec, amount], ...] for damage dealt, oldest first, for a peak/mean
+		# DPS-over-any-window pass after the run ends. death_enemy is the source key of the
+		# hit that ended the run, "" if it didn't end in death.
+		"dmg_dealt": {},
+		"dmg_taken": {},
+		"dmg_log": [],
+		"healing": 0.0,
+		"grade_hist": {},
+		"death_enemy": "",
+		"offered": [],   # every item/power/rune id ever offered, for sweep_report's
+		                 # never-offered / never-picked columns
 	}
+	_reset_streams(int(run.seed))
 
 
 func has_run() -> bool:
 	return not run.is_empty() and not run.get("preview", false)
+
+
+## Simulated seconds since the run started: physics frames elapsed / tick rate, not a real
+## clock read. Time.get_ticks_msec() is real wall time - correct for a human's play session,
+## but headless --fixed-fps runs (sweeps, tests) simulate far faster than real time, which
+## would make every dmg_log timestamp (and so every DPS figure) meaningless.
+func run_time() -> float:
+	var started: int = int(run.get("started_frame", 0))
+	return (Engine.get_physics_frames() - started) / float(Engine.physics_ticks_per_second)
 
 
 func page_id() -> String:
@@ -84,7 +108,7 @@ func _on_keeper_defeated(_n: Dictionary) -> void:
 	var fam: String = page().family
 	if not meta.keepers.has(fam):
 		meta.keepers.append(fam)
-	var unlock_map := {"percussion": "whole", "wind": "eighth", "string": "half"}
+	var unlock_map := {ContentIds.PageIds.PERCUSSION: ContentIds.CharacterIds.WHOLE, ContentIds.PageIds.WIND: ContentIds.CharacterIds.EIGHTH, ContentIds.PageIds.STRING: ContentIds.CharacterIds.HALF}
 	if unlock_map.has(fam) and unlock(unlock_map[fam]):
 		toast.emit("%s can now be played." % Content.character(unlock_map[fam]).name, Pal.GOLD)
 	save()

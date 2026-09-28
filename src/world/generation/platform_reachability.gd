@@ -4,8 +4,8 @@ class_name PlatformReachability
 ## any platform nobody can reach a stepping-stone ledge on the line below it.
 
 const TUNING: LevelGenTuning = preload("res://content/tuning/level_gen_tuning.tres")
-## Safety bound: even a three-staff climb never needs more stepping stones than this.
-const MAX_PASSES := 60
+## Safety bound: a room never needs more stepping stones than this.
+const MAX_PASSES := 12
 
 
 ## segments: Array of {"y", "x0", "x1"}. line_ys: bottom line first. Mutates segments.

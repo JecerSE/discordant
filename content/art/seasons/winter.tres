@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="Season" format=3]
+
+[ext_resource type="Resource" path="res://content/art/seasons/particles_frost.tres" id="1_1rjfr"]
+[ext_resource type="Script" path="res://src/art/season.gd" id="2_tdx2b"]
+[ext_resource type="Script" path="res://src/art/parallax_plane.gd" id="2_v4y57"]
+[ext_resource type="Resource" path="res://content/art/seasons/plane_winter_0.tres" id="3_48le8"]
+[ext_resource type="Resource" path="res://content/art/seasons/plane_winter_1.tres" id="4_3jxke"]
+[ext_resource type="Resource" path="res://content/art/seasons/plane_winter_2.tres" id="5_b8yd6"]
+
+[resource]
+script = ExtResource("2_tdx2b")
+id = "winter"
+family = "string"
+palette = PackedColorArray(0.431, 0.337, 0.702, 1, 0.62, 0.78, 0.88, 1, 0.36, 0.42, 0.55, 1, 0.8, 0.86, 0.93, 1)
+particles = ExtResource("1_1rjfr")
+planes = Array[ExtResource("2_v4y57")]([ExtResource("3_48le8"), ExtResource("4_3jxke"), ExtResource("5_b8yd6")])

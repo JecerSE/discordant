@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ParallaxPlane" format=3]
+
+[ext_resource type="Script" path="res://src/art/parallax_plane.gd" id="1_hdyt5"]
+
+[resource]
+script = ExtResource("1_hdyt5")
+sprite_key = "season_winter_plane_2"
+depth = 0.58
+height = 107.0
+palette_index = 1
+alpha = 0.07
+swell_a = 10.0
+cycles_a = 3
+swell_b = 5.0
+cycles_b = 7
+peaks = 30.0
+peak_cycles = 16

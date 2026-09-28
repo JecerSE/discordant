@@ -1,6 +1,7 @@
 class_name FxBase
 extends Node2D
 var room: Node
+var enemy_roster: EnemyRoster
 var t := 0.0
 var life := 1.0
 

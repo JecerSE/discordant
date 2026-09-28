@@ -2,6 +2,7 @@ class_name FxPillar
 extends StaticBody2D
 ## A stone pillar raised from the ground. It is solid while it stands.
 var room: Node
+var enemy_roster: EnemyRoster
 var t := 0.0
 var life := 5.0
 var height := 150.0
@@ -20,7 +21,7 @@ func _ready() -> void:
 	_shape.position = Vector2(0, height * 0.5)
 	add_child(_shape)
 	# Launch whatever stands on the spot.
-	for e in room.alive_enemies():
+	for e in enemy_roster.alive_enemies():
 		if absf(e.global_position.x - global_position.x) < width * 0.5 + e.r + 10.0 and absf(e.feet_y() - global_position.y) < 60.0:
 			var i := info.duplicate()
 			i["knock"] = Vector2(0, -900.0)

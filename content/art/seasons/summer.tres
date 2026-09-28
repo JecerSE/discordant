@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="Season" format=3]
+
+[ext_resource type="Resource" path="res://content/art/seasons/particles_heat_shimmer.tres" id="1_edt54"]
+[ext_resource type="Script" path="res://src/art/season.gd" id="2_afmdm"]
+[ext_resource type="Script" path="res://src/art/parallax_plane.gd" id="2_k2a07"]
+[ext_resource type="Resource" path="res://content/art/seasons/plane_summer_0.tres" id="3_pwrf2"]
+[ext_resource type="Resource" path="res://content/art/seasons/plane_summer_1.tres" id="4_13o2h"]
+[ext_resource type="Resource" path="res://content/art/seasons/plane_summer_2.tres" id="5_yi611"]
+
+[resource]
+script = ExtResource("2_afmdm")
+id = "summer"
+family = "wind"
+palette = PackedColorArray(0.259, 0.608, 0.584, 1, 0.93, 0.74, 0.3, 1, 0.45, 0.7, 0.82, 1, 0.86, 0.72, 0.5, 1)
+particles = ExtResource("1_edt54")
+planes = Array[ExtResource("2_k2a07")]([ExtResource("3_pwrf2"), ExtResource("4_13o2h"), ExtResource("5_yi611")])

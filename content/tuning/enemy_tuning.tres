@@ -6,7 +6,6 @@
 script = ExtResource("1")
 aggro_range = 560.0
 leash_range = 900.0
-hunt_when_remaining = 2
 patrol_radius = 260.0
 patrol_min_step = 80.0
 patrol_arrive_distance = 14.0

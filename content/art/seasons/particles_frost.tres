@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SeasonParticles" format=3]
+
+[ext_resource type="Script" path="res://src/art/season_particles.gd" id="1_o0psw"]
+
+[resource]
+script = ExtResource("1_o0psw")
+sprite_key = "season_frost"
+per_1000px = 22.0
+velocity = Vector2(-8, 26)
+sway = 14.0
+sway_rate = 0.6
+scale_min = 0.6
+scale_max = 0.95
+alpha = 0.6

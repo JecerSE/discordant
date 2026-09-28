@@ -10,20 +10,24 @@ func _init() -> void:
 
 func tick(delta: float) -> void:
 	_tick -= delta
-	for e in room.enemies_in_circle(global_position, radius):
+	for e in enemy_roster.enemies_in_circle(global_position, radius):
 		if e.boss:
 			continue
 		var to: Vector2 = global_position + Vector2(0, -60) - e.global_position
 		e.external_push(to.normalized() * 520.0 * delta * 8.0)
 	if _tick <= 0.0:
 		_tick = 0.25
-		for e in room.enemies_in_circle(global_position, radius * 0.55):
+		for e in enemy_roster.enemies_in_circle(global_position, radius * 0.55):
 			var i := info.duplicate()
 			i["knock"] = Vector2(0, -120.0)
 			room.player.deal(e, dmg, i)
 
 func _draw() -> void:
 	var fade := minf(1.0, (life - t) / 0.4)
+	var art := RenderAdapter.sprite("fx_tornado") if RenderAdapter.is_on("fx_tornado") else null
+	if art:
+		RenderAdapter.draw_art(self, art, Vector2.ZERO, Vector2.ONE, Color(1, 1, 1, fade), t)
+		return
 	for i in 7:
 		var y := -i * 26.0
 		var w := 20.0 + i * 13.0

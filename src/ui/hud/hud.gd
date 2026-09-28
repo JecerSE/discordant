@@ -6,6 +6,7 @@ extends CanvasLayer
 const LAYER := 5
 
 var room: Node
+var enemy_roster: EnemyRoster
 
 var _health: HudHealthPanel
 var _powers: HudPowerBar
@@ -36,6 +37,7 @@ func _ready() -> void:
 
 func _add(w: HudWidget) -> HudWidget:
 	w.room = room
+	w.enemy_roster = enemy_roster
 	add_child(w)
 	return w
 

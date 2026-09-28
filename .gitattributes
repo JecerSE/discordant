@@ -1,0 +1,16 @@
+# Text files are stored with LF endings whatever the OS (Godot writes LF; a Windows checkout
+# with autocrlf would otherwise rewrite every .gd, .tscn and .tres on save).
+* text=auto eol=lf
+
+# Binaries: never diffed or merged as text.
+*.png binary
+*.jpg binary
+*.wav binary
+*.ogg binary
+*.mp3 binary
+*.ttf binary
+*.otf binary
+*.pdf binary
+*.zip binary
+*.exe binary
+*.x86_64 binary

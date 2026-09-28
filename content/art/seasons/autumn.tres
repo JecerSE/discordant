@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="Season" format=3]
+
+[ext_resource type="Resource" path="res://content/art/seasons/particles_leaf_note.tres" id="1_wy0g6"]
+[ext_resource type="Script" path="res://src/art/parallax_plane.gd" id="2_03rn4"]
+[ext_resource type="Script" path="res://src/art/season.gd" id="2_5pxji"]
+[ext_resource type="Resource" path="res://content/art/seasons/plane_autumn_0.tres" id="3_5sbsa"]
+[ext_resource type="Resource" path="res://content/art/seasons/plane_autumn_1.tres" id="4_ok440"]
+[ext_resource type="Resource" path="res://content/art/seasons/plane_autumn_2.tres" id="5_22265"]
+
+[resource]
+script = ExtResource("2_5pxji")
+id = "autumn"
+family = "percussion"
+palette = PackedColorArray(0.804, 0.388, 0.216, 1, 0.82, 0.58, 0.22, 1, 0.7, 0.3, 0.16, 1, 0.52, 0.2, 0.22, 1)
+particles = ExtResource("1_wy0g6")
+planes = Array[ExtResource("2_03rn4")]([ExtResource("3_5sbsa"), ExtResource("4_ok440"), ExtResource("5_22265")])

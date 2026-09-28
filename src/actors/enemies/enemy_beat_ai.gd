@@ -62,7 +62,7 @@ func _beat_basic(n: int) -> void:
 				_tether_tick += 1
 				var p = room.player
 				if p:
-					p.take_hit(dmg * 1.5, global_position)
+					p.take_hit(dmg * 1.5, global_position, {"source": id})
 				if _tether_tick >= 3:
 					_end_tether()
 			elif state == "windup":
@@ -97,7 +97,7 @@ func _beat_basic(n: int) -> void:
 				_tele()
 			elif on == 0 and has_target():
 				var n_buffed := 0
-				for o in room.alive_enemies():
+				for o in enemy_roster.alive_enemies():
 					if o != self and not o.boss and o.global_position.distance_to(global_position) < 440.0:
 						o.buff_t = Beat.beat_len() * 4.0
 						n_buffed += 1
@@ -107,10 +107,10 @@ func _beat_basic(n: int) -> void:
 					rg.radius = 440.0
 					rg.color = Pal.GOLD
 					rg.position = global_position
-					room.add_fx(rg)
+					fx.add_fx(rg)
 					Synth.sfx_play("crash", -12.0)
 		"well":
-			for o in room.alive_enemies():
+			for o in enemy_roster.alive_enemies():
 				if o != self and not o.boss:
 					o.buff_t = maxf(o.buff_t, Beat.beat_len() * 1.2)
 					if o.hp < o.max_hp:
@@ -156,7 +156,7 @@ func _beat_basic(n: int) -> void:
 					state = "bind"
 					_tether_tick = 0
 					p.bound_by = self
-					room.float_text(p.global_position + Vector2(0, -60), "BOUND: don't hit it", Pal.STRING, 18)
+					fx.float_text(p.global_position + Vector2(0, -60), "BOUND: don't hit it", Pal.STRING, 18)
 					Synth.sfx_play("zap", -6.0, -10.0)
 				else:
 					state = ""

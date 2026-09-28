@@ -17,6 +17,7 @@ var listening := false
 var _cells: Array[Array] = []   # [row][col] -> Rect2
 var _extra: Array[Rect2] = []   # reset, back
 
+
 func _rows() -> int:
 	return InputBindings.ACTIONS.size() + 2
 
@@ -78,6 +79,7 @@ func _gui_input(event: InputEvent) -> void:
 				row = InputBindings.ACTIONS.size() + k
 				_activate()
 
+
 func _activate() -> void:
 	if row < InputBindings.ACTIONS.size():
 		listening = true
@@ -88,6 +90,7 @@ func _activate() -> void:
 		Synth.sfx_play("chime", -12.0)
 	else:
 		_back()
+
 
 func _clear_cell() -> void:
 	var action: String = InputBindings.ACTIONS[row][0]

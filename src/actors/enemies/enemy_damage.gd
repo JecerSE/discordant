@@ -8,12 +8,12 @@ func take_damage(amount: float, info := {}) -> bool:
 	var kind: String = info.get("kind", "")
 	var direct := kind in ["melee", "proj", "power"]
 	if ai == "phantom" and invis and direct and not info.get("aoe", false):
-		room.float_text(global_position + Vector2(0, -r - 12), "miss", Pal.WIND, 16)
+		fx.float_text(global_position + Vector2(0, -r - 12), "miss", Pal.WIND, 16)
 		return false
 	if ai == "warden" and barrier and kind == "melee":
 		room.player.stagger(0.6)
 		Synth.sfx_play("ping", -6.0, 2.0)
-		room.float_text(global_position + Vector2(0, -r - 12), "reverb!", Pal.STRING, 18)
+		fx.float_text(global_position + Vector2(0, -r - 12), "reverb!", Pal.STRING, 18)
 		return false
 	if ai == "guard" and stance and direct:
 		if info.get("on_beat", false):
@@ -21,11 +21,11 @@ func take_damage(amount: float, info := {}) -> bool:
 			stance_beats = 4
 			amount *= 1.5
 			apply_stun(1.8)
-			room.float_text(global_position + Vector2(0, -r - 30), "shattered!", Pal.PERCUSSION, 20)
+			fx.float_text(global_position + Vector2(0, -r - 30), "shattered!", Pal.PERCUSSION, 20)
 			Synth.sfx_play("crash", -6.0)
 		else:
 			amount *= 0.1
-			room.float_text(global_position + Vector2(0, -r - 30), "blocked", Pal.INK_SOFT, 15)
+			fx.float_text(global_position + Vector2(0, -r - 30), "blocked", Pal.INK_SOFT, 15)
 			Synth.sfx_play("tick", -8.0, 8.0)
 	hp -= amount
 	aggro = true
@@ -43,7 +43,7 @@ func take_damage(amount: float, info := {}) -> bool:
 		apply_stun(info.stun)
 	if ai == "dummy":
 		hp = max_hp
-		room.on_dummy_hit(info)
+		reward_flow.on_dummy_hit(info)
 		return false
 	if ai == "elite_cellist" and hits_taken % 4 == 0:
 		_enemy_ring(120.0, dmg * 0.7, Pal.STRING)
@@ -87,7 +87,7 @@ func release_stored() -> void:
 	if stored_damage > 0.0 and not dead:
 		var amt := stored_damage
 		stored_damage = 0.0
-		room.show_damage(self, r, amt, DamageNumbers.Style.STORED)
+		fx.show_damage(self, r, amt, DamageNumbers.Style.STORED)
 		take_damage(amt, {"kind": "fermata"})
 
 
@@ -99,7 +99,7 @@ func die() -> void:
 		_end_tether()
 	if state == "bind":
 		_end_bind()
-	room.on_enemy_died(self)
+	reward_flow.on_enemy_died(self)
 	queue_free()
 
 

@@ -10,6 +10,7 @@ func _shoot_at(p: Vector2, speed: float, style: String, amount: float, col := Pa
 func _shoot_dir(dir: Vector2, speed: float, style: String, amount: float, col := Pal.INK) -> Projectile:
 	var pr := Projectile.new()
 	pr.team = "enemy"
+	pr.source_id = id
 	pr.vel = dir * speed
 	pr.style = style
 	pr.dmg = amount * dmg_mult()
@@ -17,7 +18,7 @@ func _shoot_dir(dir: Vector2, speed: float, style: String, amount: float, col :=
 	pr.life = 3.5
 	pr.radius = 9.0
 	pr.position = global_position + dir * (r + 4.0)
-	room.add_projectile(pr)
+	fx.add_projectile(pr)
 	return pr
 
 
@@ -25,6 +26,7 @@ func _enemy_shockwaves(amount: float, speed := 460.0, life := 1.1, height := 34.
 	for dd in [-1.0, 1.0]:
 		var w := FX.Shockwave.new()
 		w.team = "enemy"
+		w.source_id = id
 		w.dir = dd
 		w.dmg = amount * dmg_mult()
 		w.speed = speed
@@ -32,17 +34,18 @@ func _enemy_shockwaves(amount: float, speed := 460.0, life := 1.1, height := 34.
 		w.height = height
 		w.color = Pal.HUSH
 		w.position = Vector2(global_position.x, feet_y())
-		room.add_fx(w)
+		fx.add_fx(w)
 
 
 func _enemy_ring(radius: float, amount: float, col: Color) -> void:
 	var rg := FX.Ring.new()
 	rg.team = "enemy"
+	rg.source_id = id
 	rg.radius = radius
 	rg.dmg = amount * dmg_mult()
 	rg.color = col
 	rg.position = global_position
-	room.add_fx(rg)
+	fx.add_fx(rg)
 
 
 func _start_tether() -> void:

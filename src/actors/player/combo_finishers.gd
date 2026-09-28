@@ -9,10 +9,11 @@ static func execute(p: Player, pattern: ComboPattern, perfect: bool) -> void:
 	var dmg := pattern.damage * (TUNING.combo_perfect_multiplier if perfect else 1.0)
 	var grade := BeatGrader.Grade.PERFECT if perfect else BeatGrader.Grade.GREAT
 	var info := {"kind": "melee", "on_beat": true, "grade": grade, "combo": true}
-	var room: Node = p.room
-	room.float_text(p.global_position + Vector2(0, -p.size * 5.0), pattern.pattern_name + (" · perfect" if perfect else ""), Pal.GOLD, 22 if perfect else 18)
+	var fx: RoomFx = p.fx
+	var enemy_roster: EnemyRoster = p.enemy_roster
+	fx.float_text(p.global_position + Vector2(0, -p.size * 5.0), pattern.pattern_name + (" · perfect" if perfect else ""), Pal.GOLD, 22 if perfect else 18)
 	Synth.sfx_play("chime", -8.0 if perfect else -12.0)
-	room.shake(6.0 if perfect else 3.0)
+	fx.shake(6.0 if perfect else 3.0)
 	match pattern.finisher:
 		&"common_time":
 			_ring(p, p.global_position + Vector2(p.facing * 40.0, 0), 150.0, dmg, info, 0.0)
@@ -24,7 +25,7 @@ static func execute(p: Player, pattern: ComboPattern, perfect: bool) -> void:
 			p._later(Beat.beat_len() / Beat.tempo_scale, func(): _ring(p, p.global_position, 160.0, dmg * 0.6, info, 0.0))
 		&"dotted_rise":
 			var rect := Rect2(p.global_position + Vector2(0.0 if p.facing > 0.0 else -150.0, -110.0), Vector2(150.0, 140.0))
-			for e in room.alive_enemies():
+			for e in enemy_roster.alive_enemies():
 				if rect.grow(e.r).has_point(e.global_position):
 					var i := info.duplicate()
 					i["knock"] = Vector2(p.facing * 200.0, -900.0)
@@ -40,14 +41,14 @@ static func execute(p: Player, pattern: ComboPattern, perfect: bool) -> void:
 			p.drumroll_t = 0.0
 			p.drumroll_dmg = dmg
 		&"swing_cut":
-			var e = room.nearest_enemy(p.global_position, 520.0)
+			var e = enemy_roster.nearest_enemy(p.global_position, 520.0)
 			if e == null:
 				p._start_dash(true, 260.0, dmg)
 				return
 			var side: float = signf(e.global_position.x - p.global_position.x)
 			if side == 0.0:
 				side = 1.0
-			room.add_line_fx(p.global_position, e.global_position, Pal.GOLD)
+			fx.add_line_fx(p.global_position, e.global_position, Pal.GOLD)
 			p.global_position = e.global_position + Vector2(side * (e.r + 26.0), 0)
 			p.facing = -side
 			p.iframes = maxf(p.iframes, 0.25)
@@ -66,4 +67,4 @@ static func _ring(p: Player, at: Vector2, radius: float, dmg: float, info: Dicti
 	r.color = Pal.GOLD
 	r.stun = stun
 	r.position = at
-	p.room.add_fx(r)
+	p.fx.add_fx(r)

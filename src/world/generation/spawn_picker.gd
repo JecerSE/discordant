@@ -4,10 +4,7 @@ class_name SpawnPicker
 
 const TUNING: LevelGenTuning = preload("res://content/tuning/level_gen_tuning.tres")
 const FLYING_AI := ["flyer", "shooter", "gust", "echo", "elite_piper", "elite_violist", "motif", "dasher", "phantom"]
-## Flyers appear between this far below the ceiling and this far above the floor (px),
-## so in a climb they fill every staff, not just the bottom screen.
-const AIR_TOP := 150.0
-const AIR_ABOVE_FLOOR := 240.0
+const AIR_BAND := Vector2(150.0, 420.0)
 const EDGE_BAND := 260.0
 const TRIES := 40
 
@@ -38,41 +35,24 @@ static func _candidate(room: Node, ai: String, rng: RandomNumberGenerator, from_
 			x_hi = x_lo + EDGE_BAND
 		else:
 			x_lo = x_hi - EDGE_BAND
-	var band := _band(room)
 	if ai in FLYING_AI:
-		var air_lo := maxf(AIR_TOP, band.x)
-		var air_hi := maxf(air_lo, minf(room.floor_y - AIR_ABOVE_FLOOR, band.y))
-		return Vector2(rng.randf_range(x_lo, x_hi), rng.randf_range(air_lo, air_hi))
+		return Vector2(rng.randf_range(x_lo, x_hi), rng.randf_range(AIR_BAND.x, AIR_BAND.y))
 	if ai == "well":
 		return Vector2(rng.randf_range(maxf(x_lo, 400.0), minf(x_hi, room.width - 250.0)), room.floor_y - 30.0)
 	if ai == "dropper":
-		var lines: Array = room.line_ys.slice(2).filter(func(y): return y >= band.x and y <= band.y)
-		var line: float = lines[rng.randi() % lines.size()] if not lines.is_empty() else room.line_ys[2]
+		var line: float = room.line_ys[rng.randi_range(2, 4)]
 		return Vector2(rng.randf_range(x_lo, x_hi), line + 40.0)
 	# Ground enemies: any surface, weighted by its length, the floor counted as one.
-	var surfaces: Array = []
-	if room.floor_y <= band.y:
-		surfaces.append({"y": room.floor_y, "x0": x_lo, "x1": x_hi})
+	var surfaces: Array = [{"y": room.floor_y, "x0": x_lo, "x1": x_hi}]
 	for s in room.segments:
-		if s.x1 - s.x0 >= 80.0 and s.x1 > x_lo and s.x0 < x_hi and s.y >= band.x and s.y <= band.y:
+		if s.x1 - s.x0 >= 80.0 and s.x1 > x_lo and s.x0 < x_hi:
 			surfaces.append(s)
-	if surfaces.is_empty():
-		surfaces.append({"y": room.floor_y, "x0": x_lo, "x1": x_hi})
 	var s: Dictionary = _weighted(surfaces, rng)
 	var lo: float = maxf(s.x0 + 30.0, x_lo)
 	var hi: float = minf(s.x1 - 30.0, x_hi)
 	if hi <= lo:
 		hi = lo + 1.0
 	return Vector2(rng.randf_range(lo, hi), s.y - 30.0)
-
-
-## The heights (min y, max y) enemies may appear at: the whole room when it is one
-## screen tall, otherwise a band around the player.
-static func _band(room: Node) -> Vector2:
-	if room.systems <= 1 or room.player == null:
-		return Vector2(-INF, INF)
-	var y: float = room.player.global_position.y
-	return Vector2(y - TUNING.spawn_vertical_band, y + TUNING.spawn_vertical_band)
 
 
 static func _weighted(surfaces: Array, rng: RandomNumberGenerator) -> Dictionary:

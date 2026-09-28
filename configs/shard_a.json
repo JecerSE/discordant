@@ -1,0 +1,14 @@
+{
+  "id": "shard_a",
+  "note": "Baseline: random item policy, full climb, 150 runs per character.",
+  "runs": 600,
+  "characters": [
+    "quarter",
+    "whole",
+    "half",
+    "eighth"
+  ],
+  "base_seed": 100000,
+  "clefs": false,
+  "item_policy": "random"
+}

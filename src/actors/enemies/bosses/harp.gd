@@ -14,7 +14,7 @@ func boss_setup() -> void:
 
 
 func ai_process(d: float) -> void:
-	var cx: float = room.width * 0.5 + sin(t * 0.35) * 380.0
+	var cx: float = arena.width * 0.5 + sin(t * 0.35) * 380.0
 	_fly_to(Vector2(cx, 280.0 + sin(t * 0.8) * 40.0), d, spd)
 	face_player()
 	if state == "pull":
@@ -38,15 +38,15 @@ func ai_beat(n: int) -> void:
 	elif b == 6 and state == "pull_windup":
 		state = "pull"
 		Synth.sfx_play("zap", -4.0, -10.0)
-		room.add_line_fx(global_position, p.global_position, Pal.STRING)
+		fx.add_line_fx(global_position, p.global_position, Pal.STRING)
 	elif n % 2 == 0 and _sweep < 0:
 		column(p.global_position.x)
 		Synth.note("pluck", 55 + [0, 3, 7, 10, 12][n % 5], -4.0, false)
 		if phase >= 2:
-			column(randf_range(60, room.width - 60))
+			column(Game.stream("combat").randf_range(60, arena.width - 60))
 	if phase >= 2 and n % 16 == 0:
 		_sweep = 0
-		_sweep_dir = 1 if randf() < 0.5 else -1
+		_sweep_dir = 1 if Game.stream("combat").randf() < 0.5 else -1
 	if phase >= 3 and n % 4 == 3:
 		for k in 3:
 			var pr := _shoot_dir((p.global_position - global_position).normalized().rotated((k - 1) * 0.35), 280.0, "ring", dmg * 0.8, Pal.STRING)
@@ -59,7 +59,7 @@ func ai_beat(n: int) -> void:
 
 func _physics_process(delta: float) -> void:
 	super._physics_process(delta)
-	if dead or room.frozen:
+	if dead or fight.frozen():
 		return
 	# A sweep plays every string in order, one per sixteenth.
 	if _sweep >= 0:
@@ -67,12 +67,12 @@ func _physics_process(delta: float) -> void:
 		if st <= 0.0:
 			st = Beat.step_len() * 2.0 / Beat.tempo_scale
 			var count := 12
-			var x: float = (room.width / count) * (_sweep + 0.5)
+			var x: float = (arena.width / count) * (_sweep + 0.5)
 			if _sweep_dir < 0:
-				x = room.width - x
+				x = arena.width - x
 			# Leave one gap so the sweep can always be survived.
 			if _sweep != 7:
-				column(x, 1.0, room.width / count - 20.0, dmg * 0.8)
+				column(x, 1.0, arena.width / count - 20.0, dmg * 0.8)
 			Synth.note("pluck", 55 + _sweep * 2, -10.0, false)
 			_sweep += 1
 			if _sweep >= count:
@@ -80,15 +80,10 @@ func _physics_process(delta: float) -> void:
 
 
 func draw_body(col: Color) -> void:
-	var gold := Pal.PODIUM if col == Pal.INK else col
 	var h := r * 2.2
-	var pts := PackedVector2Array()
-	for i in 13:
-		var k := i / 12.0
-		pts.append(Vector2(-r + k * r * 2.0, -h * 0.5 - sin(k * PI) * r * 0.5 + k * r * 0.4))
-	draw_polyline(pts, gold, 7.0, true)
-	draw_line(Vector2(-r, -h * 0.5), Vector2(-r, h * 0.5), gold, 9.0, true)
-	draw_line(Vector2(-r, h * 0.5), Vector2(r, -h * 0.1), gold, 6.0, true)
+	# The frame (BossArt); the strings vibrate and the eye looks where it faces, in code.
+	if not _boss_body_sprite(col):
+		BossArt.harp_frame(self, r, col)
 	for i in 8:
 		var x := -r + 10.0 + i * (r * 2.0 - 20.0) / 7.0
 		var top := -h * 0.5 - sin(((x + r) / (r * 2.0)) * PI) * r * 0.5 + ((x + r) / (r * 2.0)) * r * 0.4

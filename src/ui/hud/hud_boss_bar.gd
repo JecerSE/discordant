@@ -7,9 +7,9 @@ const TOP := 30.0
 
 
 func _draw() -> void:
-	if room == null or room.boss_node == null or not is_instance_valid(room.boss_node) or room.boss_node.dead:
+	if room == null or enemy_roster.boss_node == null or not is_instance_valid(enemy_roster.boss_node) or enemy_roster.boss_node.dead:
 		return
-	var b = room.boss_node
+	var b = enemy_roster.boss_node
 	var x := size.x * 0.5 - WIDTH * 0.5
 	UI.outlined(self, Vector2(size.x * 0.5, TOP), b.ename, 22, Pal.INK, Pal.PAPER)
 	var frac := clampf(b.hp / b.max_hp, 0.0, 1.0)

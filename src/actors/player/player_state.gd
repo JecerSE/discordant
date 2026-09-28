@@ -14,6 +14,11 @@ const BUFFER := 0.13
 const MOVE_TUNING: PlayerMovementTuning = preload("res://content/tuning/player_movement_tuning.tres")
 
 var room: Node
+var enemy_roster: EnemyRoster
+var reward_flow: RewardFlow
+var arena: Arena
+var fx: RoomFx
+var fight: FightState
 var char_id := "quarter"
 var size := 13.0
 var facing := 1.0
@@ -95,8 +100,6 @@ var combo_tracker: ComboTracker
 var jump_grade: BeatGrader.Grade = BeatGrader.Grade.NONE
 var flow_t := 0.0
 var dash_on_beat := false
-## Draws the body as a pixel sprite (created in _ready).
-var animator: PlayerAnimator
 
 
 func refresh_stats() -> void:

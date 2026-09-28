@@ -23,11 +23,18 @@ func _ready() -> void:
 	Layout.build(self)
 	_build_geometry()
 
-	var backdrop := EnvironmentBackdrop.new()
-	backdrop.setup(self)
-	add_child(backdrop)
+	arena.width = width
+	arena.floor_y = floor_y
+	arena.line_ys = line_ys
+	arena.segments = segments
+	fx.room = self
+	fight.room = self
+
 	_bg = preload("res://src/world/background.gd").new()
-	_bg.setup(self, rng)
+	# Cosmetic, not generation: background grain/blobs must never share a draw count with
+	# waves and loot, or a purely visual tweak would shift which enemies spawn (issue found on
+	# the pixel-art branch: this used to run, from the same rng, before _build_waves()).
+	_bg.setup(self, Game.stream("cosmetic"))
 	add_child(_bg)
 	_layer_actors = Node2D.new()
 	add_child(_layer_actors)
@@ -36,16 +43,23 @@ func _ready() -> void:
 	_layer_fx = Node2D.new()
 	add_child(_layer_fx)
 
+	reward_flow.room = self
+
 	player = Player.new()
 	player.room = self
-	player.position = spawn_pos
+	player.enemy_roster = enemy_roster
+	player.reward_flow = reward_flow
+	player.arena = arena
+	player.fx = fx
+	player.fight = fight
+	player.position = Vector2(90, floor_y - 40)
 	_layer_actors.add_child(player)
 
 	cam = Camera2D.new()
 	cam.limit_left = 0
 	cam.limit_right = int(width)
 	cam.limit_top = 0
-	cam.limit_bottom = int(height)
+	cam.limit_bottom = 720
 	cam.position_smoothing_enabled = true
 	cam.position_smoothing_speed = 7.0
 	player.add_child(cam)
@@ -53,6 +67,7 @@ func _ready() -> void:
 
 	hud = Hud.new()
 	hud.room = self
+	hud.enemy_roster = enemy_roster
 	add_child(hud)
 
 	var song: Dictionary = Content.PAGES[page_id].song
@@ -102,7 +117,8 @@ func _physics_process(delta: float) -> void:
 	# Camera shake.
 	if shake_amt > 0.0:
 		shake_amt = move_toward(shake_amt, 0.0, delta * 30.0)
-		cam.offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake_amt * Game.settings.get("shake", 1.0)
+		var cr := Game.stream("cosmetic")
+		cam.offset = Vector2(cr.randf_range(-1, 1), cr.randf_range(-1, 1)) * shake_amt * Game.settings.get("shake", 1.0)
 	else:
 		cam.offset = Vector2.ZERO
 
@@ -122,7 +138,6 @@ func _physics_process(delta: float) -> void:
 		Synth.hush = move_toward(Synth.hush, base_hush(), delta * MUSIC_TUNING.hush_follow_speed)
 
 	_update_features(delta)
-	_update_ink(delta)
 	for l in _line_fx:
 		l.t -= delta
 	_line_fx = _line_fx.filter(func(l): return l.t > 0.0)
@@ -139,7 +154,7 @@ func _physics_process(delta: float) -> void:
 		"fight":
 			if type != "boss":
 				_check_reinforcements()
-			if type != "boss" and alive_enemies().is_empty() and pending_spawns <= 0:
+			if type != "boss" and alive_enemies().is_empty() and enemy_roster.pending_spawns <= 0:
 				if wave_i + 1 < waves.size():
 					_spawn_delay -= delta
 					if _spawn_delay <= 0.0:
@@ -150,8 +165,8 @@ func _physics_process(delta: float) -> void:
 	if player and not player.dead:
 		# Out of bounds safety.
 		if player.global_position.y > floor_y + 200.0:
-			player.global_position = spawn_pos
-		if exit_open and has_exit and not _leaving and exit_rect.has_point(player.global_position):
+			player.global_position = Vector2(90, floor_y - 60)
+		if exit_open and has_exit and not _leaving and player.global_position.x > width - 80.0 and player.global_position.y > line_ys[4]:
 			_leave()
 		_interaction()
 
@@ -176,46 +191,6 @@ func _interaction() -> void:
 	hud.set_prompt(best)
 	if best and overlay == null and (Input.is_action_just_pressed("interact") or Input.is_action_just_pressed("up")):
 		Events.interact(self, best)
-
-
-func on_player_strike(rect: Rect2, _on_beat: bool) -> void:
-	for ft in features:
-		if ft.kind == "harmonic" and ft.get("cd", 0.0) <= 0.0 and rect.grow(16).has_point(ft.pos):
-			ft.cd = 1.2
-			var r := FX.Ring.new()
-			r.radius = 140.0
-			r.dmg = 18.0
-			r.info = {"kind": "power", "proc": false}
-			r.color = Pal.STRING
-			r.position = ft.pos
-			add_fx(r)
-			Synth.note("pluck", 67 + rng.randi() % 7, -4.0, false)
-
-
-func on_dummy_hit(info: Dictionary) -> void:
-	var off := Beat.signed_offset()
-	var on_beat: bool = info.get("on_beat", false)
-	var txt := "on the beat!" if on_beat else ("early %d ms" % int(-off * 1000.0) if off < 0.0 else "late %d ms" % int(off * 1000.0))
-	if info.get("kind", "") != "melee" and info.get("kind", "") != "power" and info.get("kind", "") != "proj":
-		return
-	if practice.active and not practice.done:
-		if on_beat:
-			practice.count += 1
-			txt = "%d / 4" % practice.count
-			Synth.note("keys", 72 + practice.count * 2, -6.0, false)
-			if practice.count >= 4:
-				practice.done = true
-				practice.active = false
-				Events.teaching_passed(self)
-		else:
-			if practice.count > 0:
-				txt += ", start over"
-			practice.count = 0
-	float_text(player.global_position + Vector2(0, -70), txt, Pal.GOLD if on_beat else Pal.INK_SOFT, 16)
-
-
-func on_power_used(_id: String) -> void:
-	pass
 
 
 func _update_features(delta: float) -> void:
